@@ -1,0 +1,414 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Taman Bermain Sains — IPA untuk PAUD</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --sky:#BEE7F5;
+    --sun:#FFC94D;
+    --grass:#8FD97A;
+    --petal:#FF9AB0;
+    --plum:#B48CE0;
+    --card:#FFFFFF;
+    --ink:#3A3130;
+  }
+  *{ box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+  html,body{ margin:0; padding:0; }
+  body{
+    background:linear-gradient(180deg, var(--sky) 0%, #EAF7EE 55%, #FFF9E9 100%);
+    color:var(--ink);
+    font-family:'Baloo 2', sans-serif;
+    min-height:100vh;
+    overflow-x:hidden;
+  }
+  button{ font-family:inherit; }
+
+  #app{ max-width:760px; margin:0 auto; padding:0 16px 50px; }
+
+  header{
+    display:flex; align-items:center; justify-content:space-between;
+    padding:16px 2px 6px;
+  }
+  header a.home{
+    text-decoration:none; font-weight:800; font-size:14px; color:#5c6b52;
+    background:#ffffffaa; padding:8px 14px; border-radius:999px;
+  }
+  header .mascot{ font-size:38px; }
+
+  main{ display:none; }
+  main.active{ display:block; }
+
+  /* ---------- hub ---------- */
+  .hub-title{ text-align:center; margin:6px 0 26px; }
+  .hub-title h1{ font-size:26px; margin:0 0 6px; }
+  .hub-title p{ margin:0; font-size:15px; color:#5c6b52; font-weight:600; }
+
+  .playground{
+    display:grid; grid-template-columns:1fr 1fr; gap:18px;
+  }
+  @media (max-width:480px){ .playground{ grid-template-columns:1fr; } }
+
+  .swing{
+    position:relative; border:none; cursor:pointer;
+    border-radius:32px; padding:22px 16px 20px; text-align:center;
+    color:#fff; font-weight:700; font-size:17px;
+    box-shadow:0 6px 0 var(--swing-shadow, #3d8630);
+    transition:transform .12s ease;
+  }
+  .swing:active{ transform:translateY(4px); box-shadow:0 2px 0 var(--swing-shadow, #3d8630); }
+  .swing .big-icon{ font-size:46px; display:block; margin-bottom:8px; }
+  .swing .sticker{
+    position:absolute; top:10px; right:10px; font-size:20px;
+    background:#fff; border-radius:50%; width:32px; height:32px;
+    display:flex; align-items:center; justify-content:center;
+    box-shadow:0 2px 0 rgba(0,0,0,.12);
+  }
+
+  /* ---------- game screen ---------- */
+  .game-card{
+    background:var(--card); border-radius:32px; padding:24px 20px 28px;
+    margin-top:10px; box-shadow:0 6px 0 #e3ddc8; text-align:center;
+  }
+  .game-top{ display:flex; align-items:center; justify-content:space-between; margin-bottom:10px; }
+  .game-top .back{ background:#f1efe4; border:none; border-radius:999px; padding:8px 14px; font-weight:800; font-size:13px; cursor:pointer; }
+  .game-top .title{ font-size:16px; font-weight:700; }
+
+  .repeat-btn{
+    display:inline-flex; align-items:center; gap:8px; margin:6px auto 18px;
+    background:var(--sun); border:none; border-radius:999px; padding:10px 20px;
+    font-weight:800; font-size:15px; cursor:pointer; box-shadow:0 4px 0 #c98c00;
+  }
+  .repeat-btn:active{ transform:translateY(3px); box-shadow:0 1px 0 #c98c00; }
+
+  .stage-visual{ font-size:64px; margin:6px 0 16px; }
+  .prompt-text{ font-size:19px; font-weight:700; line-height:1.5; margin:0 0 20px; }
+
+  .choice-row{ display:flex; gap:14px; justify-content:center; flex-wrap:wrap; }
+  .choice{
+    background:#fdfaf1; border:3px solid #ece3cc; border-radius:24px;
+    width:130px; padding:16px 8px 14px; cursor:pointer;
+    transition:transform .12s ease, border-color .15s ease;
+  }
+  .choice:hover{ transform:translateY(-3px); border-color:var(--plum); }
+  .choice .emoji{ font-size:48px; display:block; margin-bottom:6px; }
+  .choice .label{ font-size:14px; font-weight:700; }
+  .choice.shake{ animation:shake .4s ease; border-color:var(--petal); }
+  .choice.correct-glow{ border-color:var(--grass); background:#eefbe8; }
+  @keyframes shake{ 0%,100%{transform:translateX(0);} 25%{transform:translateX(-6px);} 75%{transform:translateX(6px);} }
+  @media (prefers-reduced-motion: reduce){ .choice.shake{ animation:none; } }
+
+  .binary-row{ display:flex; gap:18px; justify-content:center; }
+  .binary-btn{
+    flex:1; max-width:170px; border:none; border-radius:24px; padding:26px 10px;
+    font-size:18px; font-weight:800; color:#fff; cursor:pointer;
+  }
+  .binary-btn.besar{ background:var(--plum); box-shadow:0 5px 0 #7c58a8; }
+  .binary-btn.kecil{ background:var(--petal); box-shadow:0 5px 0 #c9556e; }
+  .binary-btn .emoji{ font-size:40px; display:block; margin-bottom:6px; }
+
+  /* ---------- celebration ---------- */
+  .celebrate{
+    background:var(--card); border-radius:32px; padding:34px 20px; text-align:center;
+    margin-top:10px; box-shadow:0 6px 0 #e3ddc8;
+  }
+  .celebrate .icon{ font-size:66px; }
+  .celebrate h2{ margin:8px 0 4px; font-size:23px; }
+  .celebrate p{ margin:0 0 22px; color:#5c6b52; font-weight:600; }
+  .celebrate .stickers{ display:flex; justify-content:center; gap:8px; margin:14px 0 22px; flex-wrap:wrap; }
+  .celebrate .stickers span{ font-size:26px; background:#fff8e9; border-radius:50%; padding:8px; box-shadow:0 2px 0 #eadfb8; }
+  .btn-round{
+    border:none; border-radius:16px; padding:13px 26px; font-weight:800; font-size:16px;
+    cursor:pointer; color:#fff; background:var(--grass); box-shadow:0 4px 0 #4f9a3d;
+  }
+  .btn-round:active{ transform:translateY(3px); box-shadow:0 1px 0 #4f9a3d; }
+
+  .confetti-piece{
+    position:fixed; top:-24px; font-size:22px; pointer-events:none; z-index:99;
+    animation:fall 1.7s ease-in forwards;
+  }
+  @keyframes fall{ to{ transform:translateY(100vh) rotate(260deg); opacity:0; } }
+</style>
+</head>
+<body>
+<div id="app">
+
+  <header>
+    <a class="home" href="index.html">← Beranda</a>
+    <span class="mascot">🐝</span>
+  </header>
+
+  <main id="view-hub" class="active">
+    <div class="hub-title">
+      <h1>Taman Bermain Sains</h1>
+      <p>Dengar, lihat, dan sentuh gambar yang tepat!</p>
+    </div>
+    <div class="playground" id="playground"></div>
+  </main>
+
+  <main id="view-game">
+    <div class="game-card">
+      <div class="game-top">
+        <button class="back" id="btn-back">← Kembali</button>
+        <span class="title" id="game-title-label"></span>
+        <span style="width:70px;"></span>
+      </div>
+      <button class="repeat-btn" id="btn-repeat">🔊 Dengar lagi</button>
+      <div class="stage-visual" id="stage-visual"></div>
+      <div class="prompt-text" id="prompt-text"></div>
+      <div id="answer-area"></div>
+    </div>
+  </main>
+
+  <main id="view-celebrate">
+    <div class="celebrate">
+      <span class="icon">🎉</span>
+      <h2 id="cel-title">Pintar sekali!</h2>
+      <p id="cel-text">Kamu berhasil menyelesaikan permainan ini.</p>
+      <div class="stickers" id="cel-stickers"></div>
+      <button class="btn-round" id="btn-again">Main lagi</button><br><br>
+      <button class="back" id="btn-cel-home" style="margin-top:6px;">Kembali ke Taman</button>
+    </div>
+  </main>
+
+</div>
+
+<script>
+(function(){
+
+  const GAMES = [
+    {
+      id:'hewan', name:'Suara Hewan', icon:'🐶', color:'#8FD97A', shadow:'#4f9a3d',
+      instruction:'Dengarkan suaranya, lalu sentuh hewan yang tepat.',
+      rounds:[
+        { say:'Suara guk guk itu suara siapa ya?', answer:{emoji:'🐶',label:'Anjing'}, options:[{emoji:'🐱',label:'Kucing'},{emoji:'🐔',label:'Ayam'}] },
+        { say:'Meong, meong. Itu suara siapa ya?', answer:{emoji:'🐱',label:'Kucing'}, options:[{emoji:'🐶',label:'Anjing'},{emoji:'🐮',label:'Sapi'}] },
+        { say:'Kukuruyuk! Itu suara siapa ya?', answer:{emoji:'🐔',label:'Ayam'}, options:[{emoji:'🦆',label:'Bebek'},{emoji:'🐐',label:'Kambing'}] },
+        { say:'Mooo. Itu suara siapa ya?', answer:{emoji:'🐮',label:'Sapi'}, options:[{emoji:'🐴',label:'Kuda'},{emoji:'🐑',label:'Domba'}] },
+        { say:'Embek, embek. Itu suara siapa ya?', answer:{emoji:'🐐',label:'Kambing'}, options:[{emoji:'🐔',label:'Ayam'},{emoji:'🐱',label:'Kucing'}] },
+      ]
+    },
+    {
+      id:'cuaca', name:'Cuaca Hari Ini', icon:'☀️', color:'#FFC94D', shadow:'#c98c00',
+      instruction:'Dengarkan ceritanya, lalu sentuh gambar cuaca yang tepat.',
+      rounds:[
+        { say:'Langit cerah dan matahari bersinar terang. Ini cuaca apa ya?', answer:{emoji:'☀️',label:'Cerah'}, options:[{emoji:'🌧️',label:'Hujan'},{emoji:'☁️',label:'Berawan'}] },
+        { say:'Air jatuh dari langit, semua jadi basah. Ini cuaca apa ya?', answer:{emoji:'🌧️',label:'Hujan'}, options:[{emoji:'☀️',label:'Cerah'},{emoji:'💨',label:'Berangin'}] },
+        { say:'Langit tertutup awan tebal berwarna abu-abu. Ini cuaca apa ya?', answer:{emoji:'☁️',label:'Berawan'}, options:[{emoji:'☀️',label:'Cerah'},{emoji:'🌧️',label:'Hujan'}] },
+        { say:'Daun-daun bergoyang tertiup dan terasa sejuk. Ini cuaca apa ya?', answer:{emoji:'💨',label:'Berangin'}, options:[{emoji:'🌧️',label:'Hujan'},{emoji:'☀️',label:'Cerah'}] },
+        { say:'Ada kilat dan suara guntur yang keras. Ini cuaca apa ya?', answer:{emoji:'⛈️',label:'Badai'}, options:[{emoji:'☀️',label:'Cerah'},{emoji:'☁️',label:'Berawan'}] },
+      ]
+    },
+    {
+      id:'tubuh', name:'Bagian Tubuhku', icon:'👋', color:'#FF9AB0', shadow:'#c9556e',
+      instruction:'Dengarkan kata yang disebut, lalu sentuh gambar yang cocok.',
+      rounds:[
+        { say:'Yang mana ya matamu?', answer:{emoji:'👀',label:'Mata'}, options:[{emoji:'👃',label:'Hidung'},{emoji:'👂',label:'Telinga'}] },
+        { say:'Yang mana ya hidungmu?', answer:{emoji:'👃',label:'Hidung'}, options:[{emoji:'👀',label:'Mata'},{emoji:'👄',label:'Mulut'}] },
+        { say:'Yang mana ya telingamu?', answer:{emoji:'👂',label:'Telinga'}, options:[{emoji:'🖐️',label:'Tangan'},{emoji:'🦶',label:'Kaki'}] },
+        { say:'Yang mana ya tanganmu?', answer:{emoji:'🖐️',label:'Tangan'}, options:[{emoji:'🦶',label:'Kaki'},{emoji:'👂',label:'Telinga'}] },
+        { say:'Yang mana ya kakimu?', answer:{emoji:'🦶',label:'Kaki'}, options:[{emoji:'🖐️',label:'Tangan'},{emoji:'👃',label:'Hidung'}] },
+      ]
+    },
+    {
+      id:'tanaman', name:'Tanaman Tumbuh', icon:'🌱', color:'#B48CE0', shadow:'#7c58a8',
+      instruction:'Dengarkan ceritanya, lalu sentuh apa yang akan terjadi selanjutnya.',
+      rounds:[
+        { say:'Ini biji. Kalau disiram air, biji akan tumbuh menjadi apa ya?', visual:'🌰', answer:{emoji:'🌱',label:'Tunas'}, options:[{emoji:'🌸',label:'Bunga'},{emoji:'🍎',label:'Buah'}] },
+        { say:'Ini tunas kecil. Lama-lama tunas akan tumbuh menjadi apa ya?', visual:'🌱', answer:{emoji:'🌿',label:'Tanaman'}, options:[{emoji:'🌰',label:'Biji'},{emoji:'🌳',label:'Pohon besar'}] },
+        { say:'Tanaman ini sudah besar. Selanjutnya ia akan mengeluarkan apa ya?', visual:'🌿', answer:{emoji:'🌸',label:'Bunga'}, options:[{emoji:'🌰',label:'Biji'},{emoji:'🌱',label:'Tunas'}] },
+        { say:'Bunga yang cantik ini lama-lama akan berubah menjadi apa ya?', visual:'🌸', answer:{emoji:'🍎',label:'Buah'}, options:[{emoji:'🌱',label:'Tunas'},{emoji:'🌰',label:'Biji'}] },
+      ]
+    },
+    {
+      id:'ukuran', name:'Besar atau Kecil', icon:'🐘', color:'#3AACD9', shadow:'#2a86ab', binary:true,
+      instruction:'Dengarkan nama bendanya, lalu sentuh BESAR atau KECIL.',
+      rounds:[
+        { say:'Gajah itu besar atau kecil ya?', visual:'🐘', answer:'besar' },
+        { say:'Semut itu besar atau kecil ya?', visual:'🐜', answer:'kecil' },
+        { say:'Rumah itu besar atau kecil ya?', visual:'🏠', answer:'besar' },
+        { say:'Kancing baju itu besar atau kecil ya?', visual:'🔘', answer:'kecil' },
+        { say:'Gunung itu besar atau kecil ya?', visual:'⛰️', answer:'besar' },
+      ]
+    },
+  ];
+
+  // in-memory only — no persistent storage
+  let stickers = {}; // gameId -> true once completed at least once
+  let current = { gameIndex:0, roundIndex:0 };
+
+  const views = {
+    hub: document.getElementById('view-hub'),
+    game: document.getElementById('view-game'),
+    celebrate: document.getElementById('view-celebrate'),
+  };
+  function showView(name){
+    Object.values(views).forEach(v=>v.classList.remove('active'));
+    views[name].classList.add('active');
+  }
+
+  function speak(text){
+    try{
+      if(!('speechSynthesis' in window)) return;
+      window.speechSynthesis.cancel();
+      const u = new SpeechSynthesisUtterance(text);
+      u.lang = 'id-ID';
+      u.rate = 0.92;
+      u.pitch = 1.05;
+      window.speechSynthesis.speak(u);
+    }catch(e){ /* speech not available, silently ignore */ }
+  }
+
+  function renderHub(){
+    const wrap = document.getElementById('playground');
+    wrap.innerHTML = '';
+    GAMES.forEach((g, i)=>{
+      const b = document.createElement('button');
+      b.className = 'swing';
+      b.style.background = g.color;
+      b.style.setProperty('--swing-shadow', g.shadow);
+      b.innerHTML = `
+        <span class="big-icon">${g.icon}</span>
+        ${g.name}
+        ${stickers[g.id] ? '<span class="sticker">⭐</span>' : ''}
+      `;
+      b.addEventListener('click', ()=> startGame(i));
+      wrap.appendChild(b);
+    });
+  }
+
+  function startGame(i){
+    current = { gameIndex:i, roundIndex:0 };
+    showView('game');
+    renderRound();
+  }
+
+  function renderRound(){
+    const game = GAMES[current.gameIndex];
+    const round = game.rounds[current.roundIndex];
+    document.getElementById('game-title-label').textContent = game.name;
+    document.getElementById('stage-visual').textContent = round.visual || game.icon;
+    document.getElementById('prompt-text').textContent = round.say;
+
+    const area = document.getElementById('answer-area');
+    area.innerHTML = '';
+
+    if(game.binary){
+      const row = document.createElement('div');
+      row.className = 'binary-row';
+      ['besar','kecil'].forEach(key=>{
+        const btn = document.createElement('button');
+        btn.className = 'binary-btn ' + key;
+        btn.innerHTML = `<span class="emoji">${key==='besar' ? '🐘' : '🐜'}</span>${key==='besar' ? 'BESAR' : 'KECIL'}`;
+        btn.addEventListener('click', ()=> handleAnswer(btn, key === round.answer));
+        row.appendChild(btn);
+      });
+      area.appendChild(row);
+    } else {
+      const choices = shuffle([{...round.answer, correct:true}, ...round.options.map(o=>({...o, correct:false}))]);
+      const row = document.createElement('div');
+      row.className = 'choice-row';
+      choices.forEach(c=>{
+        const btn = document.createElement('button');
+        btn.className = 'choice';
+        btn.innerHTML = `<span class="emoji">${c.emoji}</span><span class="label">${c.label}</span>`;
+        btn.addEventListener('click', ()=> handleAnswer(btn, c.correct));
+        row.appendChild(btn);
+      });
+      area.appendChild(row);
+    }
+
+    speak(round.say);
+  }
+
+  function shuffle(arr){
+    const a = arr.slice();
+    for(let i=a.length-1;i>0;i--){
+      const j = Math.floor(Math.random()*(i+1));
+      [a[i],a[j]]=[a[j],a[i]];
+    }
+    return a;
+  }
+
+  document.getElementById('btn-repeat').addEventListener('click', ()=>{
+    const game = GAMES[current.gameIndex];
+    const round = game.rounds[current.roundIndex];
+    speak(round.say);
+  });
+
+  function handleAnswer(btn, isCorrect){
+    if(isCorrect){
+      btn.classList.add('correct-glow');
+      launchConfetti(14);
+      const praises = ['Pintar sekali!', 'Betul, hebat!', 'Keren, kamu tahu!', 'Iya, benar sekali!'];
+      speak(praises[Math.floor(Math.random()*praises.length)]);
+      setTimeout(()=>{
+        const game = GAMES[current.gameIndex];
+        if(current.roundIndex < game.rounds.length - 1){
+          current.roundIndex++;
+          renderRound();
+        } else {
+          finishGame();
+        }
+      }, 1300);
+    } else {
+      btn.classList.add('shake');
+      speak('Belum tepat, ayo coba lagi ya.');
+      setTimeout(()=> btn.classList.remove('shake'), 500);
+    }
+  }
+
+  function finishGame(){
+    const game = GAMES[current.gameIndex];
+    stickers[game.id] = true;
+    document.getElementById('cel-title').textContent = 'Horeee, selesai!';
+    document.getElementById('cel-text').textContent = `Kamu jago main ${game.name}!`;
+    const stickerWrap = document.getElementById('cel-stickers');
+    stickerWrap.innerHTML = '';
+    Object.keys(stickers).forEach(id=>{
+      const g = GAMES.find(x=>x.id===id);
+      const s = document.createElement('span');
+      s.textContent = g.icon;
+      stickerWrap.appendChild(s);
+    });
+    showView('celebrate');
+    speak('Horee, selesai! Kamu hebat sekali.');
+    launchConfetti(30);
+  }
+
+  document.getElementById('btn-again').addEventListener('click', ()=>{
+    startGame(current.gameIndex);
+  });
+  document.getElementById('btn-cel-home').addEventListener('click', ()=>{
+    renderHub();
+    showView('hub');
+  });
+  document.getElementById('btn-back').addEventListener('click', ()=>{
+    window.speechSynthesis && window.speechSynthesis.cancel();
+    renderHub();
+    showView('hub');
+  });
+
+  function launchConfetti(count){
+    const emojis = ['⭐','🎈','✨','🌸'];
+    for(let i=0;i<count;i++){
+      const el = document.createElement('div');
+      el.className = 'confetti-piece';
+      el.textContent = emojis[Math.floor(Math.random()*emojis.length)];
+      el.style.left = Math.random()*100 + 'vw';
+      el.style.animationDelay = (Math.random()*0.3)+'s';
+      el.style.fontSize = (16 + Math.random()*14)+'px';
+      document.body.appendChild(el);
+      setTimeout(()=> el.remove(), 2200);
+    }
+  }
+
+  renderHub();
+})();
+</script>
+</body>
+</html>

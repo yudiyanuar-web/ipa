@@ -1,0 +1,614 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Petualangan Sains — IPA untuk Sekolah Dasar</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700;800&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#FFF8E9;
+    --ink:#234B40;
+    --sun:#FFB100;
+    --sky:#3AACD9;
+    --leaf:#5FAF46;
+    --coral:#FF6F59;
+    --berry:#8E5FB0;
+    --card:#FFFFFF;
+    --line-w: 4px;
+    --radius-blob: 44% 56% 62% 38% / 48% 42% 58% 52%;
+  }
+  *{ box-sizing:border-box; }
+  html,body{ margin:0; padding:0; }
+  body{
+    background:
+      radial-gradient(circle at 8% 12%, rgba(255,177,0,.14), transparent 40%),
+      radial-gradient(circle at 92% 78%, rgba(58,172,217,.16), transparent 42%),
+      var(--paper);
+    color:var(--ink);
+    font-family:'Nunito', sans-serif;
+    min-height:100vh;
+    -webkit-font-smoothing:antialiased;
+  }
+  h1,h2,h3,.display{ font-family:'Baloo 2', sans-serif; }
+  button{ font-family:inherit; }
+
+  /* ---------- layout shell ---------- */
+  #app{ max-width:780px; margin:0 auto; padding:0 18px 60px; }
+
+  header.topbar{
+    position:sticky; top:0; z-index:20;
+    display:flex; align-items:center; justify-content:space-between;
+    padding:14px 4px 12px;
+    background:linear-gradient(var(--paper) 78%, transparent);
+  }
+  .brand{ display:flex; align-items:center; gap:10px; }
+  .brand .mascot{ font-size:34px; line-height:1; filter:drop-shadow(0 3px 0 rgba(0,0,0,.08)); }
+  .brand .titles{ display:flex; flex-direction:column; line-height:1.15; }
+  .brand .titles strong{ font-size:19px; }
+  .brand .titles span{ font-size:12.5px; color:#5c7d74; }
+  .home-link{
+    font-size:12.5px; font-weight:800; color:#5c7d74; text-decoration:none;
+    background:#f1ede0; padding:6px 12px; border-radius:999px; white-space:nowrap;
+  }
+  .home-link:hover{ background:#e7e0cb; }
+  .topbar-inner{ display:flex; align-items:center; gap:10px; }
+
+  .star-tally{
+    display:flex; align-items:center; gap:6px;
+    background:var(--card); border:2px solid #ffe1a1;
+    padding:7px 14px 7px 10px; border-radius:999px;
+    box-shadow:0 3px 0 #f2dcae;
+    font-weight:800; font-size:15px;
+  }
+  .star-tally .ico{ font-size:18px; }
+
+  main{ display:none; }
+  main.active{ display:block; }
+
+  /* ---------- welcome ---------- */
+  .welcome{
+    background:var(--card);
+    border-radius:28px;
+    padding:30px 26px 26px;
+    margin-top:6px;
+    box-shadow:0 6px 0 #ecdcb9;
+    text-align:center;
+  }
+  .welcome .mascot-big{ font-size:64px; display:block; margin-bottom:6px; }
+  .welcome h1{ margin:0 0 6px; font-size:26px; }
+  .welcome p{ margin:0 auto 20px; max-width:46ch; color:#4c6a61; font-size:15.5px; line-height:1.55; }
+  .btn-start{
+    background:var(--leaf); color:#fff; border:none;
+    font-family:'Baloo 2',sans-serif; font-weight:700; font-size:17px;
+    padding:14px 30px; border-radius:16px; cursor:pointer;
+    box-shadow:0 5px 0 #3d8630;
+    transition:transform .12s ease;
+  }
+  .btn-start:active{ transform:translateY(3px); box-shadow:0 2px 0 #3d8630; }
+
+  /* ---------- island trail ---------- */
+  .trail-heading{ margin:26px 4px 4px; font-size:16.5px; color:#4c6a61; }
+  .trail{ position:relative; margin-top:10px; padding-bottom:20px; }
+  .trail::before{
+    content:""; position:absolute; left:50%; top:6px; bottom:20px; width:var(--line-w);
+    background-image:repeating-linear-gradient(to bottom, #9fbfb2 0 12px, transparent 12px 24px);
+    transform:translateX(-50%); border-radius:4px;
+  }
+  .island-row{ display:flex; position:relative; margin:6px 0; }
+  .island-row.left{ justify-content:flex-start; padding-right:50%; }
+  .island-row.right{ justify-content:flex-end; padding-left:50%; }
+
+  .island{
+    position:relative; width:150px;
+    background:var(--card);
+    border-radius:var(--radius-blob);
+    padding:16px 10px 14px;
+    text-align:center;
+    border:none;
+    cursor:pointer;
+    box-shadow:0 5px 0 var(--isl-shadow, #d8d2c0);
+    transition:transform .15s ease;
+  }
+  .island:hover:not(.locked){ transform:translateY(-3px) rotate(-1deg); }
+  .island:focus-visible{ outline:3px solid var(--sky); outline-offset:3px; }
+  .island .num{
+    position:absolute; top:8px; left:10px;
+    font-family:'Baloo 2',sans-serif; font-weight:700; font-size:12px;
+    color:#fff; background:var(--isl-color, var(--leaf));
+    width:20px; height:20px; border-radius:50%;
+    display:flex; align-items:center; justify-content:center;
+  }
+  .island .icon{ font-size:34px; display:block; margin-bottom:4px; }
+  .island .name{ font-family:'Baloo 2',sans-serif; font-weight:600; font-size:13.5px; line-height:1.2; }
+  .island .stars{ margin-top:6px; font-size:13px; letter-spacing:1px; }
+  .island.locked{ cursor:default; opacity:.55; }
+  .island.locked .lockmark{
+    position:absolute; inset:0; display:flex; align-items:center; justify-content:center;
+    font-size:26px; background:rgba(255,248,233,.5); border-radius:var(--radius-blob);
+  }
+  .island.done{ box-shadow:0 5px 0 var(--isl-color, var(--leaf)); }
+
+  /* ---------- quiz ---------- */
+  .quiz-card{
+    background:var(--card); border-radius:26px; padding:22px 22px 26px;
+    margin-top:8px; box-shadow:0 6px 0 #ecdcb9;
+  }
+  .quiz-top{ display:flex; align-items:center; justify-content:space-between; margin-bottom:6px; }
+  .quiz-top .place{ display:flex; align-items:center; gap:8px; font-family:'Baloo 2',sans-serif; font-weight:600; }
+  .quiz-top .place .icon{ font-size:24px; }
+  .back-link{ background:none; border:none; color:#5c7d74; font-weight:700; font-size:13.5px; cursor:pointer; padding:6px 8px; border-radius:8px; }
+  .back-link:hover{ background:#f1ede0; }
+
+  .progress-dots{ display:flex; gap:6px; margin:10px 0 18px; }
+  .progress-dots .dot{ flex:1; height:8px; border-radius:6px; background:#eee4cb; }
+  .progress-dots .dot.filled{ background:var(--isl-color, var(--leaf)); }
+
+  .q-text{ font-size:19px; font-weight:700; line-height:1.4; margin:6px 0 18px; }
+  .options{ display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+  .opt{
+    background:#fdfaf1; border:2px solid #ece3cc; border-radius:16px;
+    padding:14px 12px; font-size:15px; font-weight:700; text-align:left;
+    cursor:pointer; transition:transform .1s ease, border-color .15s ease;
+  }
+  .opt:hover:not([disabled]){ border-color:var(--sky); transform:translateY(-2px); }
+  .opt.correct{ background:#eaf7e2; border-color:var(--leaf); color:#2f6b1f; }
+  .opt.wrong{ background:#fdeae7; border-color:var(--coral); color:#a8382a; }
+  .opt[disabled]{ cursor:default; }
+
+  .feedback{
+    margin-top:16px; padding:14px 16px; border-radius:14px;
+    background:#f4f0e0; font-size:14.5px; line-height:1.5; display:none;
+  }
+  .feedback.show{ display:block; }
+  .feedback .tag{ font-family:'Baloo 2',sans-serif; font-weight:700; display:block; margin-bottom:3px; }
+
+  .btn-next{
+    margin-top:16px; width:100%; border:none; border-radius:14px;
+    background:var(--sky); color:#fff; font-family:'Baloo 2',sans-serif;
+    font-weight:700; font-size:16px; padding:13px; cursor:pointer;
+    box-shadow:0 4px 0 #2a86ab; display:none;
+  }
+  .btn-next.show{ display:block; }
+  .btn-next:active{ transform:translateY(3px); box-shadow:0 1px 0 #2a86ab; }
+
+  /* ---------- results ---------- */
+  .result-card{
+    background:var(--card); border-radius:26px; padding:30px 24px; margin-top:10px;
+    text-align:center; box-shadow:0 6px 0 #ecdcb9; position:relative; overflow:hidden;
+  }
+  .result-card .icon{ font-size:56px; }
+  .result-card h2{ margin:8px 0 4px; }
+  .result-card .stars-earned{ font-size:34px; margin:10px 0; letter-spacing:6px; }
+  .result-card p{ color:#4c6a61; max-width:38ch; margin:0 auto 20px; line-height:1.5; }
+  .result-actions{ display:flex; gap:10px; justify-content:center; flex-wrap:wrap; }
+  .btn-secondary, .btn-primary{
+    border:none; border-radius:14px; padding:12px 20px; font-weight:700;
+    font-family:'Baloo 2',sans-serif; cursor:pointer; font-size:15px;
+  }
+  .btn-primary{ background:var(--leaf); color:#fff; box-shadow:0 4px 0 #3d8630; }
+  .btn-secondary{ background:#f1ede0; color:var(--ink); box-shadow:0 4px 0 #ddd5ba; }
+
+  /* ---------- finale ---------- */
+  .finale{
+    background:linear-gradient(160deg,#fff 0%, #fff9e9 100%);
+    border-radius:28px; padding:36px 24px; text-align:center; margin-top:10px;
+    box-shadow:0 6px 0 #ecdcb9;
+  }
+  .finale .trophy{ font-size:70px; }
+  .badges{ display:flex; justify-content:center; gap:10px; flex-wrap:wrap; margin:18px 0; }
+  .badges .badge{ font-size:30px; background:#fff; border-radius:50%; padding:10px; box-shadow:0 3px 0 #eadfb8; }
+
+  /* confetti */
+  .confetti-piece{
+    position:fixed; top:-20px; font-size:20px; pointer-events:none; z-index:99;
+    animation:fall 1.6s ease-in forwards;
+  }
+  @keyframes fall{
+    to{ transform:translateY(100vh) rotate(280deg); opacity:0; }
+  }
+
+  @media (max-width:560px){
+    .island-row.left, .island-row.right{ justify-content:center; padding:0; }
+    .options{ grid-template-columns:1fr; }
+  }
+  @media (prefers-reduced-motion: reduce){
+    *{ animation-duration:.01ms !important; transition:none !important; }
+  }
+</style>
+</head>
+<body>
+<div id="app">
+
+  <header class="topbar">
+    <div class="topbar-inner">
+      <a class="home-link" href="index.html">← Beranda</a>
+      <div class="brand">
+        <span class="mascot">🦉</span>
+        <span class="titles">
+          <strong>Petualangan Sains</strong>
+          <span>IPA untuk Sekolah Dasar</span>
+        </span>
+      </div>
+    </div>
+    <div class="star-tally"><span class="ico">⭐</span><span id="star-total">0</span> / <span id="star-max">21</span></div>
+  </header>
+
+  <main id="view-welcome" class="active">
+    <div class="welcome">
+      <span class="mascot-big">🦉</span>
+      <h1>Halo, penjelajah! Siap berpetualang?</h1>
+      <p>Ada 7 pulau IPA yang menunggu untuk dijelajahi. Selesaikan tantangan di setiap pulau, kumpulkan bintang, dan buka pulau berikutnya!</p>
+      <button class="btn-start" id="btn-play">Mulai Petualangan 🚀</button>
+    </div>
+  </main>
+
+  <main id="view-map">
+    <p class="trail-heading">Pilih pulau untuk mulai menjelajah:</p>
+    <div class="trail" id="trail"></div>
+  </main>
+
+  <main id="view-quiz">
+    <div class="quiz-card">
+      <div class="quiz-top">
+        <div class="place"><span class="icon" id="q-icon">🌿</span><span id="q-place">Nama Pulau</span></div>
+        <button class="back-link" id="btn-back-map">← Peta</button>
+      </div>
+      <div class="progress-dots" id="progress-dots"></div>
+      <div class="q-text" id="q-text">Pertanyaan</div>
+      <div class="options" id="q-options"></div>
+      <div class="feedback" id="q-feedback">
+        <span class="tag" id="q-feedback-tag"></span>
+        <span id="q-feedback-text"></span>
+      </div>
+      <button class="btn-next" id="btn-next">Lanjut →</button>
+    </div>
+  </main>
+
+  <main id="view-result">
+    <div class="result-card">
+      <span class="icon" id="r-icon">🎉</span>
+      <h2 id="r-title">Hebat!</h2>
+      <div class="stars-earned" id="r-stars">⭐⭐⭐</div>
+      <p id="r-text">Kamu menyelesaikan pulau ini dengan baik!</p>
+      <div class="result-actions">
+        <button class="btn-secondary" id="btn-retry">Coba Lagi</button>
+        <button class="btn-primary" id="btn-to-map">Kembali ke Peta</button>
+      </div>
+    </div>
+  </main>
+
+  <main id="view-finale">
+    <div class="finale">
+      <span class="trophy">🏆</span>
+      <h2>Selamat, Penjelajah Sains!</h2>
+      <p>Kamu sudah menaklukkan semua pulau IPA.</p>
+      <div class="badges" id="finale-badges"></div>
+      <p id="finale-score"></p>
+      <button class="btn-primary" id="btn-restart-all">Main Lagi dari Awal</button>
+    </div>
+  </main>
+
+</div>
+
+<script>
+(function(){
+
+  const ISLANDS = [
+    {
+      id:'indra', name:'Pulau Panca Indra', icon:'👁️', color:'var(--sky)', shadow:'#2a86ab',
+      questions:[
+        { q:'Alat indra untuk melihat adalah…', opts:['Mata','Telinga','Hidung','Lidah'], a:0, fact:'Mata membantu kita melihat warna, bentuk, dan gerakan di sekitar kita.' },
+        { q:'Kita mencium bau harum bunga menggunakan…', opts:['Kulit','Hidung','Mata','Lidah'], a:1, fact:'Hidung punya sel penciuman yang bisa mengenali ribuan macam bau.' },
+        { q:'Lidah berfungsi untuk merasakan…', opts:['Suara','Cahaya','Rasa makanan','Bau'], a:2, fact:'Lidah bisa merasakan manis, asin, asam, dan pahit.' },
+        { q:'Telinga digunakan untuk…', opts:['Melihat','Mendengar','Mengecap','Meraba'], a:1, fact:'Telinga menangkap getaran udara yang disebut bunyi.' },
+        { q:'Kulit berfungsi sebagai indra…', opts:['Pencium','Pengecap','Pendengar','Peraba'], a:3, fact:'Kulit bisa merasakan panas, dingin, halus, dan kasar.' },
+      ]
+    },
+    {
+      id:'makhluk', name:'Hutan Makhluk Hidup', icon:'🌳', color:'var(--leaf)', shadow:'#3d8630',
+      questions:[
+        { q:'Ciri makhluk hidup adalah dapat…', opts:['Bernapas','Terbuat dari besi','Diam selamanya','Tidak butuh makan'], a:0, fact:'Semua makhluk hidup bernapas untuk mendapatkan energi.' },
+        { q:'Tempat hidup suatu makhluk hidup disebut…', opts:['Sekolah','Habitat','Kandang saja','Rumah kaca'], a:1, fact:'Habitat adalah rumah alami sebuah makhluk hidup, misalnya sungai atau hutan.' },
+        { q:'Contoh makhluk hidup adalah…', opts:['Batu','Kursi','Kucing','Meja'], a:2, fact:'Kucing bisa tumbuh, bergerak, dan berkembang biak — itu tanda makhluk hidup.' },
+        { q:'Makhluk hidup membutuhkan … untuk tumbuh.', opts:['Uang','Makanan dan air','Mainan','Baju baru'], a:1, fact:'Makanan dan air memberi energi supaya tubuh bisa tumbuh dan bergerak.' },
+        { q:'Ikan biasanya hidup di…', opts:['Udara','Salju','Air','Tanah kering'], a:2, fact:'Ikan bernapas dengan insang, sehingga cocok hidup di air.' },
+      ]
+    },
+    {
+      id:'tumbuhan', name:'Kebun Tumbuhan', icon:'🌱', color:'var(--sun)', shadow:'#c98c00',
+      questions:[
+        { q:'Bagian tumbuhan yang menyerap air dari tanah adalah…', opts:['Daun','Akar','Bunga','Batang'], a:1, fact:'Akar juga berfungsi menahan tumbuhan agar berdiri kokoh.' },
+        { q:'Tumbuhan membuat makanannya sendiri melalui proses…', opts:['Respirasi','Pencernaan','Fotosintesis','Fermentasi'], a:2, fact:'Fotosintesis terjadi di daun dengan bantuan cahaya matahari.' },
+        { q:'Bagian tumbuhan yang menghasilkan buah adalah…', opts:['Akar','Bunga','Duri','Batang'], a:1, fact:'Setelah bunga dibuahi, ia bisa berkembang menjadi buah.' },
+        { q:'Tumbuhan membutuhkan cahaya dari…', opts:['Lilin','Matahari','Lampu senter','Bulan'], a:1, fact:'Cahaya matahari adalah sumber energi utama untuk fotosintesis.' },
+        { q:'Daun berwarna hijau karena mengandung…', opts:['Garam','Minyak','Klorofil','Darah'], a:2, fact:'Klorofil membantu daun menangkap cahaya matahari.' },
+      ]
+    },
+    {
+      id:'hewan', name:'Taman Hewan', icon:'🦁', color:'var(--coral)', shadow:'#c14a3a',
+      questions:[
+        { q:'Hewan yang makan tumbuhan disebut…', opts:['Karnivora','Herbivora','Omnivora','Insektivora'], a:1, fact:'Sapi dan kelinci adalah contoh hewan herbivora.' },
+        { q:'Hewan yang makan daging disebut…', opts:['Herbivora','Omnivora','Karnivora','Vegetaria'], a:2, fact:'Singa dan harimau adalah contoh hewan karnivora.' },
+        { q:'Ayam berkembang biak dengan cara…', opts:['Melahirkan','Bertelur','Membelah diri','Bertunas'], a:1, fact:'Hewan yang bertelur disebut ovipar.' },
+        { q:'Ikan bernapas menggunakan…', opts:['Paru-paru','Insang','Kulit','Trakea'], a:1, fact:'Insang menyaring oksigen yang terlarut di dalam air.' },
+        { q:'Kupu-kupu yang indah dulunya berasal dari…', opts:['Biji','Ulat','Jamur','Telur ikan'], a:1, fact:'Perubahan dari ulat menjadi kupu-kupu disebut metamorfosis sempurna.' },
+      ]
+    },
+    {
+      id:'energi', name:'Bengkel Energi', icon:'⚡', color:'var(--berry)', shadow:'#6d4788',
+      questions:[
+        { q:'Sumber energi utama di bumi adalah…', opts:['Baterai','Angin','Matahari','Bulan'], a:2, fact:'Matahari memberi cahaya dan panas untuk kehidupan di bumi.' },
+        { q:'Lampu menyala karena adanya energi…', opts:['Bunyi','Listrik','Gerak','Panas'], a:1, fact:'Energi listrik mengalir melalui kabel menuju lampu.' },
+        { q:'Kipas angin mengubah energi listrik menjadi energi…', opts:['Cahaya','Kimia','Gerak','Bunyi'], a:2, fact:'Baling-baling kipas berputar karena energi gerak.' },
+        { q:'Alat yang memanfaatkan energi matahari langsung adalah…', opts:['Kulkas','Panel surya','Setrika','Televisi'], a:1, fact:'Panel surya mengubah cahaya matahari menjadi energi listrik.' },
+        { q:'Contoh sumber energi yang dapat diperbarui adalah…', opts:['Minyak bumi','Batu bara','Angin','Gas alam'], a:2, fact:'Angin tidak akan habis, berbeda dengan minyak bumi dan batu bara.' },
+      ]
+    },
+    {
+      id:'tatasurya', name:'Langit Tata Surya', icon:'🪐', color:'#3AACD9', shadow:'#2a86ab',
+      questions:[
+        { q:'Planet tempat kita tinggal bernama…', opts:['Mars','Bumi','Venus','Jupiter'], a:1, fact:'Bumi adalah satu-satunya planet yang diketahui punya kehidupan.' },
+        { q:'Pusat tata surya adalah…', opts:['Bulan','Matahari','Bumi','Bintang jatuh'], a:1, fact:'Semua planet mengelilingi matahari karena gaya gravitasinya.' },
+        { q:'Planet yang dijuluki planet merah adalah…', opts:['Venus','Saturnus','Mars','Neptunus'], a:2, fact:'Warna merah Mars berasal dari tanahnya yang kaya zat besi.' },
+        { q:'Perputaran bumi mengelilingi matahari disebut…', opts:['Rotasi','Revolusi','Orbit diam','Gravitasi'], a:1, fact:'Satu kali revolusi bumi memakan waktu sekitar satu tahun.' },
+        { q:'Planet yang memiliki cincin indah adalah…', opts:['Bumi','Merkurius','Mars','Saturnus'], a:3, fact:'Cincin Saturnus terbuat dari kumpulan es dan batu.' },
+      ]
+    },
+    {
+      id:'benda', name:'Lab Sifat Benda', icon:'🧪', color:'var(--leaf)', shadow:'#3d8630',
+      questions:[
+        { q:'Air termasuk benda…', opts:['Padat','Cair','Gas','Keras'], a:1, fact:'Benda cair bentuknya mengikuti wadahnya.' },
+        { q:'Es batu termasuk benda…', opts:['Cair','Gas','Padat','Uap'], a:2, fact:'Benda padat punya bentuk dan ukuran yang tetap.' },
+        { q:'Contoh benda gas adalah…', opts:['Batu','Udara','Kayu','Pasir'], a:1, fact:'Udara tidak terlihat tapi bisa kita rasakan saat angin bertiup.' },
+        { q:'Benda padat memiliki bentuk yang…', opts:['Berubah-ubah','Tetap','Mengikuti wadah','Menghilang'], a:1, fact:'Berbeda dengan cairan, bentuk benda padat tidak berubah walau dipindah.' },
+        { q:'Proses air berubah menjadi es disebut…', opts:['Mencair','Menguap','Membeku','Mengembun'], a:2, fact:'Membeku terjadi ketika air didinginkan hingga suhu sangat rendah.' },
+      ]
+    },
+  ];
+
+  const MAX_STARS = ISLANDS.length * 3;
+  document.getElementById('star-max').textContent = MAX_STARS;
+
+  // in-memory state (resets on reload — no persistent storage used)
+  let progress = ISLANDS.map((isl,i)=>({ stars:0, unlocked:i===0 }));
+  let current = { islandIndex:0, qIndex:0, correct:0, answered:false };
+
+  const views = {
+    welcome: document.getElementById('view-welcome'),
+    map: document.getElementById('view-map'),
+    quiz: document.getElementById('view-quiz'),
+    result: document.getElementById('view-result'),
+    finale: document.getElementById('view-finale'),
+  };
+  function showView(name){
+    Object.values(views).forEach(v=>v.classList.remove('active'));
+    views[name].classList.add('active');
+  }
+
+  function totalStars(){ return progress.reduce((s,p)=>s+p.stars,0); }
+  function updateStarTally(){ document.getElementById('star-total').textContent = totalStars(); }
+
+  function renderMap(){
+    const trail = document.getElementById('trail');
+    trail.innerHTML = '';
+    ISLANDS.forEach((isl, i)=>{
+      const p = progress[i];
+      const row = document.createElement('div');
+      row.className = 'island-row ' + (i % 2 === 0 ? 'left' : 'right');
+
+      const btn = document.createElement('button');
+      btn.className = 'island' + (p.unlocked ? '' : ' locked') + (p.stars>0 ? ' done' : '');
+      btn.style.setProperty('--isl-color', isl.color);
+      btn.style.setProperty('--isl-shadow', isl.shadow);
+      btn.disabled = !p.unlocked;
+      btn.innerHTML = `
+        <span class="num">${i+1}</span>
+        <span class="icon">${isl.icon}</span>
+        <span class="name">${isl.name}</span>
+        <span class="stars">${starString(p.stars)}</span>
+        ${!p.unlocked ? '<span class="lockmark">🔒</span>' : ''}
+      `;
+      if(p.unlocked){
+        btn.addEventListener('click', ()=> startIsland(i));
+      }
+      row.appendChild(btn);
+      trail.appendChild(row);
+    });
+  }
+
+  function starString(n){
+    let s = '';
+    for(let i=0;i<3;i++) s += i<n ? '⭐' : '☆';
+    return s;
+  }
+
+  function startIsland(i){
+    current = { islandIndex:i, qIndex:0, correct:0, answered:false };
+    showView('quiz');
+    renderQuestion();
+  }
+
+  function renderQuestion(){
+    const isl = ISLANDS[current.islandIndex];
+    const q = isl.questions[current.qIndex];
+    document.getElementById('q-icon').textContent = isl.icon;
+    document.getElementById('q-place').textContent = isl.name;
+    document.getElementById('q-text').textContent = q.q;
+
+    const dotsWrap = document.getElementById('progress-dots');
+    dotsWrap.innerHTML = '';
+    isl.questions.forEach((_,idx)=>{
+      const d = document.createElement('div');
+      d.className = 'dot' + (idx <= current.qIndex ? ' filled' : '');
+      d.style.setProperty('--isl-color', isl.color);
+      dotsWrap.appendChild(d);
+    });
+    dotsWrap.querySelectorAll('.dot').forEach(d=>d.style.background='');
+    dotsWrap.querySelectorAll('.dot.filled').forEach(d=>d.style.background = isl.color);
+
+    const opts = document.getElementById('q-options');
+    opts.innerHTML = '';
+    q.opts.forEach((optText, idx)=>{
+      const b = document.createElement('button');
+      b.className = 'opt';
+      b.textContent = optText;
+      b.addEventListener('click', ()=> selectAnswer(idx));
+      opts.appendChild(b);
+    });
+
+    document.getElementById('q-feedback').classList.remove('show');
+    document.getElementById('btn-next').classList.remove('show');
+    current.answered = false;
+  }
+
+  function beep(correct){
+    try{
+      const ctx = new (window.AudioContext||window.webkitAudioContext)();
+      const o = ctx.createOscillator();
+      const g = ctx.createGain();
+      o.connect(g); g.connect(ctx.destination);
+      o.frequency.value = correct ? 880 : 220;
+      g.gain.setValueAtTime(0.06, ctx.currentTime);
+      o.start();
+      o.frequency.exponentialRampToValueAtTime(correct ? 1320 : 160, ctx.currentTime+0.18);
+      g.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime+0.22);
+      o.stop(ctx.currentTime+0.24);
+    }catch(e){ /* audio not available, ignore quietly */ }
+  }
+
+  function selectAnswer(idx){
+    if(current.answered) return;
+    current.answered = true;
+    const isl = ISLANDS[current.islandIndex];
+    const q = isl.questions[current.qIndex];
+    const isCorrect = idx === q.a;
+    if(isCorrect) current.correct++;
+
+    const buttons = document.querySelectorAll('#q-options .opt');
+    buttons.forEach((b,i)=>{
+      b.disabled = true;
+      if(i === q.a) b.classList.add('correct');
+      else if(i === idx) b.classList.add('wrong');
+    });
+
+    beep(isCorrect);
+
+    const fb = document.getElementById('q-feedback');
+    document.getElementById('q-feedback-tag').textContent = isCorrect ? 'Betul sekali! 🎉' : 'Belum tepat, tidak apa-apa.';
+    document.getElementById('q-feedback-text').textContent = q.fact;
+    fb.classList.add('show');
+
+    const nextBtn = document.getElementById('btn-next');
+    const isLast = current.qIndex === isl.questions.length - 1;
+    nextBtn.textContent = isLast ? 'Lihat Hasil 🏁' : 'Lanjut →';
+    nextBtn.classList.add('show');
+  }
+
+  document.getElementById('btn-next').addEventListener('click', ()=>{
+    const isl = ISLANDS[current.islandIndex];
+    if(current.qIndex < isl.questions.length - 1){
+      current.qIndex++;
+      renderQuestion();
+    } else {
+      finishIsland();
+    }
+  });
+
+  document.getElementById('btn-back-map').addEventListener('click', ()=>{
+    showView('map');
+  });
+
+  function finishIsland(){
+    const isl = ISLANDS[current.islandIndex];
+    const total = isl.questions.length;
+    const correct = current.correct;
+    let stars = 0;
+    if(correct >= total) stars = 3;
+    else if(correct >= total-1) stars = 2;
+    else if(correct >= Math.ceil(total*0.6)) stars = 1;
+    else stars = 0;
+
+    const p = progress[current.islandIndex];
+    if(stars > p.stars) p.stars = stars;
+    if(stars >= 1 && current.islandIndex+1 < progress.length){
+      progress[current.islandIndex+1].unlocked = true;
+    }
+    updateStarTally();
+
+    document.getElementById('r-icon').textContent = stars>=2 ? '🎉' : (stars>=1 ? '🙂' : '💪');
+    document.getElementById('r-title').textContent =
+      stars===3 ? 'Sempurna!' : stars===2 ? 'Bagus sekali!' : stars===1 ? 'Kamu lulus!' : 'Ayo coba lagi!';
+    document.getElementById('r-stars').textContent = starString(stars);
+    document.getElementById('r-text').textContent =
+      stars>=1
+        ? `Kamu menjawab benar ${correct} dari ${total} soal di ${isl.name}.`
+        : `Kamu menjawab benar ${correct} dari ${total} soal. Jawab minimal ${Math.ceil(total*0.6)} soal benar untuk membuka pulau berikutnya.`;
+
+    showView('result');
+    if(stars>=1) launchConfetti();
+
+    const allDone = progress.every(p=>p.stars>=1);
+    if(allDone){
+      setTimeout(showFinale, 900);
+    }
+  }
+
+  document.getElementById('btn-retry').addEventListener('click', ()=>{
+    startIsland(current.islandIndex);
+  });
+  document.getElementById('btn-to-map').addEventListener('click', ()=>{
+    renderMap();
+    showView('map');
+  });
+
+  function showFinale(){
+    const wrap = document.getElementById('finale-badges');
+    wrap.innerHTML = '';
+    ISLANDS.forEach(isl=>{
+      const b = document.createElement('span');
+      b.className = 'badge';
+      b.textContent = isl.icon;
+      wrap.appendChild(b);
+    });
+    document.getElementById('finale-score').textContent = `Total bintang terkumpul: ${totalStars()} dari ${MAX_STARS} ⭐`;
+    showView('finale');
+    launchConfetti(40);
+  }
+
+  document.getElementById('btn-restart-all').addEventListener('click', ()=>{
+    progress = ISLANDS.map((isl,i)=>({ stars:0, unlocked:i===0 }));
+    updateStarTally();
+    renderMap();
+    showView('map');
+  });
+
+  function launchConfetti(count){
+    const n = count || 22;
+    const emojis = ['⭐','🎉','✨','🌟'];
+    for(let i=0;i<n;i++){
+      const el = document.createElement('div');
+      el.className = 'confetti-piece';
+      el.textContent = emojis[Math.floor(Math.random()*emojis.length)];
+      el.style.left = Math.random()*100 + 'vw';
+      el.style.animationDelay = (Math.random()*0.4)+'s';
+      el.style.fontSize = (14 + Math.random()*14)+'px';
+      document.body.appendChild(el);
+      setTimeout(()=> el.remove(), 2200);
+    }
+  }
+
+  document.getElementById('btn-play').addEventListener('click', ()=>{
+    renderMap();
+    showView('map');
+  });
+
+  // init
+  updateStarTally();
+  renderMap();
+})();
+</script>
+</body>
+</html>
