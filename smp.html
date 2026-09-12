@@ -1,0 +1,562 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Laboratorium Rahasia — IPA untuk SMP</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0F1720;
+    --panel:#182430;
+    --panel-2:#1F2E3B;
+    --line:#2B3B48;
+    --cyan:#4CE0D2;
+    --lime:#B6FF5C;
+    --magenta:#FF5C8A;
+    --amber:#FFB84C;
+    --ink:#E7F0EE;
+    --muted:#7F94A0;
+  }
+  *{ box-sizing:border-box; }
+  html,body{ margin:0; padding:0; }
+  body{
+    background:
+      radial-gradient(circle at 15% 0%, rgba(76,224,210,.08), transparent 40%),
+      radial-gradient(circle at 85% 20%, rgba(255,92,138,.07), transparent 40%),
+      var(--bg);
+    color:var(--ink);
+    font-family:'Inter', sans-serif;
+    min-height:100vh;
+  }
+  h1,h2,h3,.display{ font-family:'Space Grotesk', sans-serif; }
+  button{ font-family:inherit; }
+
+  #app{ max-width:800px; margin:0 auto; padding:0 18px 60px; }
+
+  /* ---------- header ---------- */
+  header.topbar{
+    position:sticky; top:0; z-index:20;
+    padding:16px 0 12px;
+    background:linear-gradient(var(--bg) 75%, transparent);
+    display:flex; flex-direction:column; gap:10px;
+  }
+  .topbar-row{ display:flex; align-items:center; justify-content:space-between; gap:10px; }
+  .brand{ display:flex; align-items:center; gap:10px; }
+  .brand .mascot{ font-size:26px; }
+  .brand strong{ font-size:16px; letter-spacing:.2px; }
+  .home-link{
+    text-decoration:none; font-size:12.5px; font-weight:700; color:var(--muted);
+    background:var(--panel); padding:6px 12px; border-radius:8px; border:1px solid var(--line);
+  }
+  .home-link:hover{ color:var(--ink); border-color:var(--cyan); }
+
+  .xp-wrap{ display:flex; align-items:center; gap:10px; }
+  .rank-chip{
+    font-size:11.5px; font-weight:700; color:var(--bg); background:var(--amber);
+    padding:4px 10px; border-radius:999px; white-space:nowrap;
+  }
+  .xp-bar-track{
+    flex:1; height:9px; background:var(--panel-2); border-radius:6px; overflow:hidden; border:1px solid var(--line);
+  }
+  .xp-bar-fill{ height:100%; background:linear-gradient(90deg, var(--cyan), var(--lime)); width:0%; transition:width .5s ease; }
+  .xp-label{ font-size:11.5px; color:var(--muted); font-weight:600; white-space:nowrap; }
+
+  main{ display:none; }
+  main.active{ display:block; }
+
+  /* ---------- intro ---------- */
+  .intro{
+    background:var(--panel); border:1px solid var(--line); border-radius:18px;
+    padding:26px 22px; margin-top:4px;
+  }
+  .intro .tag{ font-size:11.5px; font-weight:700; color:var(--cyan); letter-spacing:1px; text-transform:uppercase; }
+  .intro h1{ font-size:24px; margin:8px 0 10px; }
+  .intro p{ color:var(--muted); font-size:14.5px; line-height:1.6; max-width:56ch; margin:0 0 18px; }
+  .btn-enter{
+    background:var(--cyan); color:#04231f; border:none; font-family:'Space Grotesk',sans-serif;
+    font-weight:700; font-size:15px; padding:12px 24px; border-radius:10px; cursor:pointer;
+  }
+  .btn-enter:hover{ filter:brightness(1.08); }
+
+  /* ---------- mission grid ---------- */
+  .grid-heading{ margin:26px 2px 12px; font-size:13px; color:var(--muted); font-weight:600; text-transform:uppercase; letter-spacing:.6px; }
+  .mission-grid{ display:grid; grid-template-columns:1fr 1fr; gap:14px; }
+  @media (max-width:560px){ .mission-grid{ grid-template-columns:1fr; } }
+
+  .mission{
+    position:relative; text-align:left; cursor:pointer;
+    background:var(--panel); border:1px solid var(--line); border-radius:16px;
+    padding:16px 16px 14px;
+    transition:border-color .15s ease, transform .12s ease;
+  }
+  .mission:hover:not(.locked){ border-color:var(--mission-color, var(--cyan)); transform:translateY(-2px); }
+  .mission .row1{ display:flex; align-items:center; justify-content:space-between; margin-bottom:8px; }
+  .mission .num{ font-size:11.5px; color:var(--muted); font-weight:700; }
+  .mission .badge-icon{ font-size:18px; }
+  .mission .icon-big{ font-size:30px; display:block; margin:4px 0 8px; }
+  .mission .name{ font-family:'Space Grotesk',sans-serif; font-weight:600; font-size:15px; line-height:1.3; margin-bottom:4px; }
+  .mission .status{ font-size:12px; color:var(--muted); }
+  .mission.locked{ opacity:.5; cursor:default; }
+  .mission.locked .lock{ position:absolute; top:14px; right:14px; font-size:16px; }
+  .mission.done{ border-color:var(--mission-color, var(--lime)); }
+
+  /* ---------- quiz ---------- */
+  .quiz-panel{
+    background:var(--panel); border:1px solid var(--line); border-radius:18px;
+    padding:22px; margin-top:6px;
+  }
+  .quiz-head{ display:flex; align-items:center; justify-content:space-between; margin-bottom:10px; }
+  .quiz-head .place{ display:flex; align-items:center; gap:8px; font-family:'Space Grotesk',sans-serif; font-weight:600; font-size:14.5px; }
+  .quiz-head .place .icon{ font-size:20px; }
+  .back-link{ background:none; border:1px solid var(--line); color:var(--muted); font-weight:700; font-size:12.5px; cursor:pointer; padding:6px 10px; border-radius:8px; }
+  .back-link:hover{ color:var(--ink); border-color:var(--cyan); }
+
+  .progress-track{ display:flex; gap:5px; margin:10px 0 20px; }
+  .progress-track .seg{ flex:1; height:6px; border-radius:4px; background:var(--panel-2); }
+  .progress-track .seg.filled{ background:var(--mission-color, var(--cyan)); }
+
+  .q-text{ font-size:17.5px; font-weight:600; line-height:1.5; margin:4px 0 18px; }
+  .options{ display:flex; flex-direction:column; gap:10px; }
+  .opt{
+    background:var(--panel-2); border:1px solid var(--line); border-radius:12px;
+    padding:13px 16px; font-size:14.5px; font-weight:600; text-align:left; color:var(--ink);
+    cursor:pointer; transition:border-color .15s ease;
+  }
+  .opt:hover:not([disabled]){ border-color:var(--cyan); }
+  .opt.correct{ border-color:var(--lime); background:rgba(182,255,92,.10); color:var(--lime); }
+  .opt.wrong{ border-color:var(--magenta); background:rgba(255,92,138,.10); color:var(--magenta); }
+  .opt[disabled]{ cursor:default; }
+
+  .feedback{
+    margin-top:16px; padding:14px 16px; border-radius:12px;
+    background:var(--panel-2); border:1px solid var(--line); font-size:13.5px; line-height:1.55; display:none;
+  }
+  .feedback.show{ display:block; }
+  .feedback .tag{ font-family:'Space Grotesk',sans-serif; font-weight:700; display:block; margin-bottom:4px; }
+  .feedback .tag.ok{ color:var(--lime); }
+  .feedback .tag.no{ color:var(--magenta); }
+  .feedback .xp-gain{ color:var(--amber); font-weight:700; }
+
+  .btn-next{
+    margin-top:16px; width:100%; border:none; border-radius:12px;
+    background:var(--cyan); color:#04231f; font-family:'Space Grotesk',sans-serif;
+    font-weight:700; font-size:15px; padding:12px; cursor:pointer; display:none;
+  }
+  .btn-next.show{ display:block; }
+  .btn-next:hover{ filter:brightness(1.08); }
+
+  /* ---------- result ---------- */
+  .result-panel{
+    background:var(--panel); border:1px solid var(--line); border-radius:18px;
+    padding:28px 22px; margin-top:6px; text-align:center;
+  }
+  .result-panel .icon{ font-size:44px; }
+  .result-panel h2{ margin:8px 0 4px; font-size:21px; }
+  .badge-row{ font-size:30px; margin:12px 0; letter-spacing:8px; }
+  .result-panel p{ color:var(--muted); max-width:42ch; margin:0 auto 20px; font-size:14px; line-height:1.55; }
+  .result-actions{ display:flex; gap:10px; justify-content:center; flex-wrap:wrap; }
+  .btn-secondary, .btn-primary{
+    border:none; border-radius:10px; padding:11px 20px; font-weight:700;
+    font-family:'Space Grotesk',sans-serif; cursor:pointer; font-size:14px;
+  }
+  .btn-primary{ background:var(--cyan); color:#04231f; }
+  .btn-secondary{ background:var(--panel-2); color:var(--ink); border:1px solid var(--line); }
+
+  /* ---------- finale ---------- */
+  .finale-panel{
+    background:linear-gradient(160deg, var(--panel) 0%, #0f2323 100%);
+    border:1px solid var(--line); border-radius:20px; padding:34px 22px; text-align:center; margin-top:6px;
+  }
+  .finale-panel .trophy{ font-size:56px; }
+  .finale-panel h2{ margin:10px 0 4px; }
+  .finale-panel .rank-final{ color:var(--amber); font-weight:700; font-family:'Space Grotesk',sans-serif; }
+  .badges-collected{ display:flex; justify-content:center; gap:10px; flex-wrap:wrap; margin:18px 0; }
+  .badges-collected .b{ font-size:26px; background:var(--panel-2); border:1px solid var(--line); border-radius:12px; padding:10px 12px; }
+
+  @media (prefers-reduced-motion: reduce){ *{ transition:none !important; } }
+</style>
+</head>
+<body>
+<div id="app">
+
+  <header class="topbar">
+    <div class="topbar-row">
+      <div class="brand">
+        <span class="mascot">🧪</span>
+        <strong>Laboratorium Rahasia</strong>
+      </div>
+      <a class="home-link" href="index.html">← Beranda</a>
+    </div>
+    <div class="xp-wrap">
+      <span class="rank-chip" id="rank-chip">Peneliti Magang</span>
+      <div class="xp-bar-track"><div class="xp-bar-fill" id="xp-bar"></div></div>
+      <span class="xp-label" id="xp-label">0 / 700 XP</span>
+    </div>
+  </header>
+
+  <main id="view-intro" class="active">
+    <div class="intro">
+      <div class="tag">Akses khusus · SMP</div>
+      <h1>Selamat datang, Peneliti.</h1>
+      <p>Kamu baru direkrut ke Laboratorium Rahasia. Ada 7 misi sains menunggu — dari klasifikasi makhluk hidup sampai tata surya lanjut. Selesaikan tiap misi untuk naik pangkat dan mengumpulkan lencana.</p>
+      <button class="btn-enter" id="btn-enter">Masuk Laboratorium →</button>
+    </div>
+  </main>
+
+  <main id="view-hub">
+    <p class="grid-heading">Pilih misi</p>
+    <div class="mission-grid" id="mission-grid"></div>
+  </main>
+
+  <main id="view-quiz">
+    <div class="quiz-panel">
+      <div class="quiz-head">
+        <div class="place"><span class="icon" id="q-icon">🧬</span><span id="q-place">Nama Misi</span></div>
+        <button class="back-link" id="btn-back-hub">← Lab</button>
+      </div>
+      <div class="progress-track" id="progress-track"></div>
+      <div class="q-text" id="q-text">Pertanyaan</div>
+      <div class="options" id="q-options"></div>
+      <div class="feedback" id="q-feedback">
+        <span class="tag" id="q-feedback-tag"></span>
+        <span id="q-feedback-text"></span>
+      </div>
+      <button class="btn-next" id="btn-next">Lanjut →</button>
+    </div>
+  </main>
+
+  <main id="view-result">
+    <div class="result-panel">
+      <span class="icon" id="r-icon">🥇</span>
+      <h2 id="r-title">Misi selesai</h2>
+      <div class="badge-row" id="r-badge">🥇</div>
+      <p id="r-text">Kamu menyelesaikan misi ini.</p>
+      <div class="result-actions">
+        <button class="btn-secondary" id="btn-retry">Ulangi Misi</button>
+        <button class="btn-primary" id="btn-to-hub">Kembali ke Lab</button>
+      </div>
+    </div>
+  </main>
+
+  <main id="view-finale">
+    <div class="finale-panel">
+      <span class="trophy">🏆</span>
+      <h2>Sertifikat Ilmuwan</h2>
+      <p>Semua misi Laboratorium Rahasia telah kamu tuntaskan.</p>
+      <p class="rank-final" id="finale-rank">Kepala Laboratorium</p>
+      <div class="badges-collected" id="finale-badges"></div>
+      <p id="finale-xp"></p>
+      <button class="btn-primary" id="btn-restart-all">Mulai Ulang</button>
+    </div>
+  </main>
+
+</div>
+
+<script>
+(function(){
+
+  const MISSIONS = [
+    {
+      id:'klasifikasi', name:'Klasifikasi Makhluk Hidup', icon:'🧬', color:'#4CE0D2',
+      questions:[
+        { q:'Sistem pengelompokan makhluk hidup berdasarkan persamaan ciri disebut…', opts:['Adaptasi','Klasifikasi','Metamorfosis','Fotosintesis'], a:1, fact:'Klasifikasi memudahkan kita mempelajari keanekaragaman makhluk hidup yang sangat banyak.' },
+        { q:'Hewan bertulang belakang disebut…', opts:['Invertebrata','Avertebrata','Vertebrata','Non-vertebrata'], a:2, fact:'Vertebrata dibagi lagi menjadi ikan, amfibi, reptil, burung, dan mamalia.' },
+        { q:'Kelompok hewan yang menyusui anaknya disebut…', opts:['Aves','Mamalia','Reptilia','Pisces'], a:1, fact:'Ciri khas mamalia adalah kelenjar susu dan tubuh berambut.' },
+        { q:'Tingkatan takson yang paling khusus (anggotanya paling mirip) adalah…', opts:['Kingdom','Filum','Kelas','Spesies'], a:3, fact:'Semakin ke bawah tingkatan takson, makhluk hidup di dalamnya semakin mirip satu sama lain.' },
+        { q:'Contoh hewan invertebrata adalah…', opts:['Cacing tanah','Kucing','Burung','Ikan'], a:0, fact:'Invertebrata adalah hewan tanpa tulang belakang, seperti cacing, serangga, dan siput.' },
+      ]
+    },
+    {
+      id:'organ', name:'Sistem Organ Tubuh Manusia', icon:'🫀', color:'#FF5C8A',
+      questions:[
+        { q:'Organ yang memompa darah ke seluruh tubuh adalah…', opts:['Paru-paru','Ginjal','Jantung','Hati'], a:2, fact:'Jantung berdetak terus-menerus untuk mengalirkan darah membawa oksigen ke sel tubuh.' },
+        { q:'Pertukaran oksigen dan karbon dioksida terjadi di…', opts:['Lambung','Alveolus','Usus halus','Ginjal'], a:1, fact:'Alveolus adalah kantong udara kecil di paru-paru tempat pertukaran gas berlangsung.' },
+        { q:'Organ yang menyaring darah dan membentuk urine adalah…', opts:['Jantung','Hati','Ginjal','Paru-paru'], a:2, fact:'Ginjal membuang zat sisa metabolisme dari darah dalam bentuk urine.' },
+        { q:'Pencernaan protein secara kimiawi dimulai di…', opts:['Mulut','Lambung','Usus besar','Kerongkongan'], a:1, fact:'Enzim pepsin di lambung mulai memecah protein menjadi molekul yang lebih kecil.' },
+        { q:'Pembuluh darah yang membawa darah dari jantung ke seluruh tubuh disebut…', opts:['Vena','Kapiler','Arteri','Pembuluh limfa'], a:2, fact:'Arteri umumnya membawa darah kaya oksigen menjauhi jantung.' },
+      ]
+    },
+    {
+      id:'ekosistem', name:'Ekosistem & Lingkungan', icon:'🌾', color:'#B6FF5C',
+      questions:[
+        { q:'Urutan makan dan dimakan antar makhluk hidup disebut…', opts:['Siklus air','Rantai makanan','Fotosintesis','Respirasi'], a:1, fact:'Rantai makanan menunjukkan aliran energi dari satu organisme ke organisme lain.' },
+        { q:'Organisme yang mampu membuat makanannya sendiri disebut…', opts:['Konsumen','Dekomposer','Produsen','Predator'], a:2, fact:'Tumbuhan hijau adalah produsen karena bisa berfotosintesis.' },
+        { q:'Organisme yang menguraikan sisa makhluk hidup yang telah mati disebut…', opts:['Produsen','Konsumen I','Dekomposer','Konsumen II'], a:2, fact:'Bakteri dan jamur adalah contoh dekomposer yang mengembalikan zat hara ke tanah.' },
+        { q:'Interaksi dua makhluk hidup yang keduanya sama-sama diuntungkan disebut…', opts:['Parasitisme','Mutualisme','Komensalisme','Kompetisi'], a:1, fact:'Contoh mutualisme adalah lebah dan bunga: lebah dapat nektar, bunga terbantu penyerbukannya.' },
+        { q:'Pencemaran udara di kota besar banyak disebabkan oleh…', opts:['Fotosintesis tumbuhan','Respirasi hewan','Asap kendaraan bermotor','Siklus air'], a:2, fact:'Asap kendaraan mengandung gas seperti CO dan CO2 yang mencemari udara.' },
+      ]
+    },
+    {
+      id:'zat', name:'Zat & Perubahannya', icon:'⚗️', color:'#FFB84C',
+      questions:[
+        { q:'Zat tunggal yang tidak dapat diuraikan lagi secara kimia disebut…', opts:['Senyawa','Unsur','Campuran','Larutan'], a:1, fact:'Contoh unsur adalah oksigen, besi, dan emas.' },
+        { q:'Gabungan dua unsur atau lebih dengan perbandingan tetap disebut…', opts:['Campuran','Koloid','Senyawa','Suspensi'], a:2, fact:'Air (H2O) adalah senyawa yang tersusun dari unsur hidrogen dan oksigen.' },
+        { q:'Air termasuk contoh…', opts:['Unsur','Senyawa','Campuran heterogen','Larutan gas'], a:1, fact:'Air terbentuk dari ikatan kimia tetap antara hidrogen dan oksigen.' },
+        { q:'Larutan yang bersifat asam umumnya memiliki pH…', opts:['Sama dengan 7','Lebih dari 7','Kurang dari 7','Tidak dapat diukur'], a:2, fact:'Semakin kecil nilai pH di bawah 7, semakin kuat sifat asamnya.' },
+        { q:'Perubahan wujud dari gas menjadi cair disebut…', opts:['Menguap','Menyublim','Membeku','Mengembun'], a:3, fact:'Mengembun terjadi misalnya saat uap air berubah menjadi embun di pagi hari.' },
+      ]
+    },
+    {
+      id:'gerak', name:'Gaya, Gerak & Energi', icon:'🛞', color:'#4CE0D2',
+      questions:[
+        { q:'Menurut Hukum I Newton, benda diam akan tetap diam kecuali…', opts:['Ada gaya yang bekerja padanya','Ada waktu yang cukup','Massanya nol','Beratnya besar'], a:0, fact:'Hukum ini juga disebut hukum kelembaman (inersia).' },
+        { q:'Satuan gaya dalam Sistem Internasional adalah…', opts:['Joule','Watt','Newton','Pascal'], a:2, fact:'Satuan Newton diambil dari nama ilmuwan Isaac Newton.' },
+        { q:'Usaha bernilai nol jika…', opts:['Gaya sangat besar','Benda tidak berpindah tempat','Benda bergerak cepat','Massa benda besar'], a:1, fact:'Dalam fisika, usaha hanya terjadi jika ada gaya yang menyebabkan perpindahan.' },
+        { q:'Energi yang dimiliki benda karena kedudukan/ketinggiannya disebut energi…', opts:['Kinetik','Kimia','Potensial','Listrik'], a:2, fact:'Contohnya buah di pohon yang tinggi memiliki energi potensial gravitasi.' },
+        { q:'Berikut ini termasuk contoh pesawat sederhana, yaitu…', opts:['Baterai','Tuas/pengungkit','Magnet','Termometer'], a:1, fact:'Tuas membantu memindahkan beban berat dengan gaya yang lebih kecil.' },
+      ]
+    },
+    {
+      id:'gelombang', name:'Getaran, Gelombang & Listrik', icon:'🔊', color:'#FF5C8A',
+      questions:[
+        { q:'Banyaknya getaran yang terjadi tiap detik disebut…', opts:['Amplitudo','Frekuensi','Periode','Panjang gelombang'], a:1, fact:'Frekuensi diukur dalam satuan Hertz (Hz).' },
+        { q:'Bunyi tidak dapat merambat melalui…', opts:['Zat padat','Zat cair','Udara','Ruang hampa udara'], a:3, fact:'Bunyi butuh medium untuk merambat, sehingga tidak terdengar di ruang hampa seperti luar angkasa.' },
+        { q:'Muatan listrik statis timbul akibat…', opts:['Perpindahan proton','Perpindahan elektron','Perpindahan neutron','Perpindahan inti atom'], a:1, fact:'Elektron lebih mudah berpindah antar benda dibanding proton atau neutron.' },
+        { q:'Rangkaian listrik yang disusun sejajar disebut rangkaian…', opts:['Seri','Paralel','Campuran','Tertutup'], a:1, fact:'Pada rangkaian paralel, jika satu lampu mati, lampu lain tetap menyala.' },
+        { q:'Alat untuk mengukur kuat arus listrik adalah…', opts:['Voltmeter','Termometer','Amperemeter','Barometer'], a:2, fact:'Amperemeter dipasang secara seri dalam rangkaian yang diukur.' },
+      ]
+    },
+    {
+      id:'bumi', name:'Bumi & Tata Surya Lanjut', icon:'🌍', color:'#B6FF5C',
+      questions:[
+        { q:'Lapisan bumi paling luar tempat kita tinggal disebut…', opts:['Inti bumi','Mantel bumi','Kerak bumi','Atmosfer luar'], a:2, fact:'Kerak bumi relatif tipis dibanding lapisan mantel dan inti di bawahnya.' },
+        { q:'Peristiwa tertutupnya matahari oleh bulan dari pandangan bumi disebut…', opts:['Gerhana bulan','Rotasi bumi','Gerhana matahari','Revolusi bulan'], a:2, fact:'Gerhana matahari terjadi ketika bulan berada tepat di antara bumi dan matahari.' },
+        { q:'Pemanasan global terutama disebabkan oleh meningkatnya gas…', opts:['Oksigen','Karbon dioksida','Nitrogen','Hidrogen'], a:1, fact:'Karbon dioksida menahan panas di atmosfer sehingga suhu bumi meningkat.' },
+        { q:'Rotasi bumi menyebabkan terjadinya…', opts:['Pergantian musim','Gerhana bulan','Pergantian siang dan malam','Pasang surut air laut'], a:2, fact:'Rotasi adalah perputaran bumi pada porosnya, satu putaran penuh sekitar 24 jam.' },
+        { q:'Lapisan atmosfer yang melindungi bumi dari radiasi ultraviolet berlebih adalah lapisan…', opts:['Troposfer','Ozon','Termosfer','Eksosfer'], a:1, fact:'Lapisan ozon berada di stratosfer dan menyerap sebagian besar radiasi UV matahari.' },
+      ]
+    },
+  ];
+
+  const XP_PER_CORRECT = 20;
+  const MAX_XP = MISSIONS.length * 5 * XP_PER_CORRECT;
+  document.getElementById('xp-label').textContent = `0 / ${MAX_XP} XP`;
+
+  const RANKS = [
+    { min:0, title:'Peneliti Magang' },
+    { min:100, title:'Asisten Laboratorium' },
+    { min:250, title:'Ilmuwan Muda' },
+    { min:400, title:'Pakar Sains' },
+    { min:550, title:'Direktur Riset' },
+    { min:700, title:'Kepala Laboratorium' },
+  ];
+
+  // in-memory only — no persistent storage used
+  let progress = MISSIONS.map((m,i)=>({ badge:0, unlocked:i===0 })); // badge: 0 none, 1 bronze, 2 silver, 3 gold
+  let totalXP = 0;
+  let current = { missionIndex:0, qIndex:0, correct:0, answered:false };
+
+  const views = {
+    intro: document.getElementById('view-intro'),
+    hub: document.getElementById('view-hub'),
+    quiz: document.getElementById('view-quiz'),
+    result: document.getElementById('view-result'),
+    finale: document.getElementById('view-finale'),
+  };
+  function showView(name){
+    Object.values(views).forEach(v=>v.classList.remove('active'));
+    views[name].classList.add('active');
+  }
+
+  function rankFor(xp){
+    let r = RANKS[0];
+    RANKS.forEach(rk=>{ if(xp >= rk.min) r = rk; });
+    return r.title;
+  }
+
+  function updateXpUI(){
+    document.getElementById('rank-chip').textContent = rankFor(totalXP);
+    document.getElementById('xp-label').textContent = `${totalXP} / ${MAX_XP} XP`;
+    document.getElementById('xp-bar').style.width = Math.min(100, (totalXP/MAX_XP)*100) + '%';
+  }
+
+  function badgeIcon(n){
+    return n===3 ? '🥇' : n===2 ? '🥈' : n===1 ? '🥉' : '—';
+  }
+
+  function renderHub(){
+    const grid = document.getElementById('mission-grid');
+    grid.innerHTML = '';
+    MISSIONS.forEach((m,i)=>{
+      const p = progress[i];
+      const card = document.createElement('button');
+      card.className = 'mission' + (p.unlocked ? '' : ' locked') + (p.badge>0 ? ' done' : '');
+      card.style.setProperty('--mission-color', m.color);
+      card.disabled = !p.unlocked;
+      card.innerHTML = `
+        <div class="row1">
+          <span class="num">MISI ${String(i+1).padStart(2,'0')}</span>
+          <span class="badge-icon">${p.badge>0 ? badgeIcon(p.badge) : ''}</span>
+        </div>
+        <span class="icon-big">${m.icon}</span>
+        <div class="name">${m.name}</div>
+        <div class="status">${p.unlocked ? (p.badge>0 ? 'Tuntas · ulangi untuk lencana lebih tinggi' : '5 soal · siap dimulai') : 'Terkunci'}</div>
+        ${!p.unlocked ? '<span class="lock">🔒</span>' : ''}
+      `;
+      if(p.unlocked) card.addEventListener('click', ()=> startMission(i));
+      grid.appendChild(card);
+    });
+  }
+
+  function startMission(i){
+    current = { missionIndex:i, qIndex:0, correct:0, answered:false };
+    showView('quiz');
+    renderQuestion();
+  }
+
+  function renderQuestion(){
+    const m = MISSIONS[current.missionIndex];
+    const q = m.questions[current.qIndex];
+    document.getElementById('q-icon').textContent = m.icon;
+    document.getElementById('q-place').textContent = m.name;
+    document.getElementById('q-text').textContent = q.q;
+
+    const track = document.getElementById('progress-track');
+    track.innerHTML = '';
+    m.questions.forEach((_,idx)=>{
+      const seg = document.createElement('div');
+      seg.className = 'seg' + (idx <= current.qIndex ? ' filled' : '');
+      seg.style.setProperty('--mission-color', m.color);
+      if(idx <= current.qIndex) seg.style.background = m.color;
+      track.appendChild(seg);
+    });
+
+    const opts = document.getElementById('q-options');
+    opts.innerHTML = '';
+    q.opts.forEach((text, idx)=>{
+      const b = document.createElement('button');
+      b.className = 'opt';
+      b.textContent = text;
+      b.addEventListener('click', ()=> selectAnswer(idx));
+      opts.appendChild(b);
+    });
+
+    document.getElementById('q-feedback').classList.remove('show');
+    document.getElementById('btn-next').classList.remove('show');
+    current.answered = false;
+  }
+
+  function selectAnswer(idx){
+    if(current.answered) return;
+    current.answered = true;
+    const m = MISSIONS[current.missionIndex];
+    const q = m.questions[current.qIndex];
+    const isCorrect = idx === q.a;
+    if(isCorrect){
+      current.correct++;
+      totalXP += XP_PER_CORRECT;
+      updateXpUI();
+    }
+
+    document.querySelectorAll('#q-options .opt').forEach((b,i)=>{
+      b.disabled = true;
+      if(i === q.a) b.classList.add('correct');
+      else if(i === idx) b.classList.add('wrong');
+    });
+
+    const fb = document.getElementById('q-feedback');
+    const tagEl = document.getElementById('q-feedback-tag');
+    tagEl.className = 'tag ' + (isCorrect ? 'ok' : 'no');
+    tagEl.textContent = isCorrect ? `Tepat! +${XP_PER_CORRECT} XP` : 'Belum tepat.';
+    document.getElementById('q-feedback-text').textContent = q.fact;
+    fb.classList.add('show');
+
+    const nextBtn = document.getElementById('btn-next');
+    const isLast = current.qIndex === m.questions.length - 1;
+    nextBtn.textContent = isLast ? 'Lihat Hasil Misi →' : 'Lanjut →';
+    nextBtn.classList.add('show');
+  }
+
+  document.getElementById('btn-next').addEventListener('click', ()=>{
+    const m = MISSIONS[current.missionIndex];
+    if(current.qIndex < m.questions.length - 1){
+      current.qIndex++;
+      renderQuestion();
+    } else {
+      finishMission();
+    }
+  });
+
+  document.getElementById('btn-back-hub').addEventListener('click', ()=>{
+    renderHub();
+    showView('hub');
+  });
+
+  function finishMission(){
+    const m = MISSIONS[current.missionIndex];
+    const total = m.questions.length;
+    const correct = current.correct;
+    let badge = 0;
+    if(correct >= total) badge = 3;
+    else if(correct >= total-1) badge = 2;
+    else if(correct >= Math.ceil(total*0.6)) badge = 1;
+    else badge = 0;
+
+    const p = progress[current.missionIndex];
+    if(badge > p.badge) p.badge = badge;
+    if(badge >= 1 && current.missionIndex+1 < progress.length){
+      progress[current.missionIndex+1].unlocked = true;
+    }
+
+    document.getElementById('r-icon').textContent = badge>=2 ? '🎯' : (badge>=1 ? '🙂' : '🔁');
+    document.getElementById('r-title').textContent =
+      badge===3 ? 'Misi tuntas sempurna!' : badge===2 ? 'Misi berhasil!' : badge===1 ? 'Misi lolos!' : 'Belum lolos, coba lagi.';
+    document.getElementById('r-badge').textContent = badge>0 ? badgeIcon(badge) : '🔁';
+    document.getElementById('r-text').textContent =
+      badge>=1
+        ? `Kamu menjawab benar ${correct} dari ${total} soal di misi ${m.name}. Total XP kamu sekarang ${totalXP}.`
+        : `Kamu menjawab benar ${correct} dari ${total} soal. Perlu minimal ${Math.ceil(total*0.6)} jawaban benar untuk membuka misi berikutnya.`;
+
+    showView('result');
+
+    const allDone = progress.every(p=>p.badge>=1);
+    if(allDone){
+      setTimeout(showFinale, 900);
+    }
+  }
+
+  document.getElementById('btn-retry').addEventListener('click', ()=>{
+    startMission(current.missionIndex);
+  });
+  document.getElementById('btn-to-hub').addEventListener('click', ()=>{
+    renderHub();
+    showView('hub');
+  });
+
+  function showFinale(){
+    const wrap = document.getElementById('finale-badges');
+    wrap.innerHTML = '';
+    MISSIONS.forEach((m,i)=>{
+      const b = document.createElement('span');
+      b.className = 'b';
+      b.textContent = m.icon + ' ' + badgeIcon(progress[i].badge);
+      wrap.appendChild(b);
+    });
+    document.getElementById('finale-rank').textContent = rankFor(totalXP);
+    document.getElementById('finale-xp').textContent = `Total XP terkumpul: ${totalXP} / ${MAX_XP}`;
+    showView('finale');
+  }
+
+  document.getElementById('btn-restart-all').addEventListener('click', ()=>{
+    progress = MISSIONS.map((m,i)=>({ badge:0, unlocked:i===0 }));
+    totalXP = 0;
+    updateXpUI();
+    renderHub();
+    showView('hub');
+  });
+
+  document.getElementById('btn-enter').addEventListener('click', ()=>{
+    renderHub();
+    showView('hub');
+  });
+
+  // init
+  updateXpUI();
+  renderHub();
+})();
+</script>
+</body>
+</html>

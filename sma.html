@@ -1,0 +1,478 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ekspedisi Sains Lanjut — IPA untuk SMA</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Spectral:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#F4EEE2;
+    --ink:#2B2320;
+    --muted:#6B6055;
+    --rust:#B0522D;
+    --forest:#3F5C46;
+    --gold:#C9A227;
+    --slate:#4A5A63;
+    --card:#FBF8F1;
+    --line:#DCD2BE;
+  }
+  *{ box-sizing:border-box; }
+  html,body{ margin:0; padding:0; }
+  body{
+    background:var(--paper);
+    color:var(--ink);
+    font-family:'IBM Plex Sans', sans-serif;
+    min-height:100vh;
+  }
+  h1,h2,h3,.display{ font-family:'Spectral', serif; }
+  button{ font-family:inherit; }
+
+  #app{ max-width:800px; margin:0 auto; padding:0 18px 60px; }
+
+  /* ---------- header ---------- */
+  header.topbar{
+    display:flex; align-items:center; justify-content:space-between;
+    padding:18px 0 14px; border-bottom:1px solid var(--line);
+    flex-wrap:wrap; gap:10px;
+  }
+  .brand{ display:flex; align-items:center; gap:10px; }
+  .brand .mark{ font-size:22px; }
+  .brand strong{ font-size:16px; letter-spacing:.2px; }
+  .brand span.sub{ display:block; font-size:11.5px; color:var(--muted); font-weight:500; }
+  .home-link{
+    text-decoration:none; font-size:12.5px; font-weight:600; color:var(--muted);
+    border:1px solid var(--line); padding:6px 12px; border-radius:6px;
+  }
+  .home-link:hover{ color:var(--ink); border-color:var(--rust); }
+
+  main{ display:none; }
+  main.active{ display:block; }
+
+  /* ---------- hero ---------- */
+  .hero{
+    position:relative; padding:34px 4px 6px; overflow:hidden;
+  }
+  .hero .contour{ position:absolute; inset:0; opacity:.5; pointer-events:none; }
+  .hero-inner{ position:relative; }
+  .hero .eyebrow{ font-size:12px; font-weight:700; color:var(--rust); text-transform:uppercase; letter-spacing:1.2px; margin-bottom:8px; }
+  .hero h1{ font-size:clamp(24px,4.6vw,32px); margin:0 0 10px; font-weight:600; line-height:1.25; }
+  .hero p{ max-width:56ch; color:var(--muted); font-size:14.5px; line-height:1.65; margin:0; }
+
+  /* ---------- readiness summary ---------- */
+  .readiness{
+    background:var(--card); border:1px solid var(--line); border-radius:14px;
+    padding:18px 20px; margin:26px 0 8px;
+    display:flex; align-items:center; gap:18px; flex-wrap:wrap;
+  }
+  .readiness .grade-circle{
+    width:60px; height:60px; border-radius:50%; flex:none;
+    border:3px solid var(--gold); display:flex; align-items:center; justify-content:center;
+    font-family:'Spectral', serif; font-weight:700; font-size:22px; color:var(--gold);
+  }
+  .readiness .rtext{ flex:1; min-width:180px; }
+  .readiness .rtext .label{ font-size:11.5px; color:var(--muted); text-transform:uppercase; letter-spacing:.6px; font-weight:700; }
+  .readiness .rtext .value{ font-size:16px; font-weight:600; margin-top:2px; }
+  .readiness .breakdown{ display:flex; gap:14px; flex-wrap:wrap; font-size:12.5px; color:var(--muted); }
+  .readiness .breakdown b{ color:var(--ink); }
+
+  /* ---------- zone grid ---------- */
+  .grid-heading{ margin:28px 2px 12px; font-size:13px; color:var(--muted); font-weight:700; text-transform:uppercase; letter-spacing:.6px; }
+  .zone-grid{ display:grid; grid-template-columns:1fr 1fr; gap:14px; }
+  @media (max-width:560px){ .zone-grid{ grid-template-columns:1fr; } }
+
+  .zone{
+    text-align:left; cursor:pointer; background:var(--card); border:1px solid var(--line);
+    border-radius:14px; padding:18px; transition:border-color .15s ease, transform .12s ease;
+  }
+  .zone:hover{ border-color:var(--zone-color, var(--rust)); transform:translateY(-2px); }
+  .zone .top{ display:flex; align-items:center; justify-content:space-between; margin-bottom:10px; }
+  .zone .icon{ font-size:26px; }
+  .zone .grade-pill{
+    font-size:12px; font-weight:700; padding:3px 10px; border-radius:999px;
+    background:var(--zone-color, var(--rust)); color:#fff;
+  }
+  .zone .grade-pill.empty{ background:var(--line); color:var(--muted); }
+  .zone h3{ font-size:16.5px; margin:0 0 5px; }
+  .zone .meta{ font-size:12.5px; color:var(--muted); }
+
+  /* ---------- quiz ---------- */
+  .quiz-panel{
+    background:var(--card); border:1px solid var(--line); border-radius:16px;
+    padding:24px; margin-top:6px;
+  }
+  .quiz-head{ display:flex; align-items:center; justify-content:space-between; margin-bottom:6px; }
+  .quiz-head .place{ display:flex; align-items:center; gap:8px; font-family:'Spectral',serif; font-weight:600; font-size:15px; }
+  .back-link{ background:none; border:1px solid var(--line); color:var(--muted); font-weight:600; font-size:12.5px; cursor:pointer; padding:6px 10px; border-radius:6px; }
+  .back-link:hover{ color:var(--ink); border-color:var(--rust); }
+
+  .q-meta-row{ display:flex; align-items:center; justify-content:space-between; margin:12px 0 4px; }
+  .q-counter{ font-size:12.5px; color:var(--muted); font-weight:600; }
+  .q-tag{
+    font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:.4px;
+    padding:3px 9px; border-radius:999px; border:1px solid var(--line); color:var(--muted);
+  }
+
+  .q-text{ font-size:17.5px; font-weight:500; line-height:1.55; margin:14px 0 20px; font-family:'Spectral',serif; }
+  .options{ display:flex; flex-direction:column; gap:10px; }
+  .opt{
+    background:#fff; border:1px solid var(--line); border-radius:10px;
+    padding:13px 16px; font-size:14.5px; font-weight:500; text-align:left; color:var(--ink);
+    cursor:pointer; transition:border-color .15s ease;
+  }
+  .opt:hover:not([disabled]){ border-color:var(--zone-color, var(--rust)); }
+  .opt.correct{ border-color:var(--forest); background:#eef4ef; color:var(--forest); font-weight:600; }
+  .opt.wrong{ border-color:var(--rust); background:#fbeee7; color:var(--rust); font-weight:600; }
+  .opt[disabled]{ cursor:default; }
+
+  .feedback{
+    margin-top:16px; padding:14px 16px; border-radius:10px;
+    background:#fff; border:1px solid var(--line); font-size:13.5px; line-height:1.6; display:none;
+  }
+  .feedback.show{ display:block; }
+  .feedback .tag{ font-family:'Spectral',serif; font-weight:700; display:block; margin-bottom:5px; font-size:14.5px; }
+  .feedback .tag.ok{ color:var(--forest); }
+  .feedback .tag.no{ color:var(--rust); }
+
+  .btn-next{
+    margin-top:16px; width:100%; border:none; border-radius:10px;
+    background:var(--ink); color:#fff; font-family:'Spectral',serif;
+    font-weight:600; font-size:15px; padding:12px; cursor:pointer; display:none;
+  }
+  .btn-next.show{ display:block; }
+  .btn-next:hover{ filter:brightness(1.15); }
+
+  /* ---------- result ---------- */
+  .result-panel{
+    background:var(--card); border:1px solid var(--line); border-radius:16px;
+    padding:30px 24px; margin-top:6px; text-align:center;
+  }
+  .result-panel .grade-big{
+    width:78px; height:78px; border-radius:50%; margin:0 auto 14px;
+    border:3px solid var(--gold); display:flex; align-items:center; justify-content:center;
+    font-family:'Spectral', serif; font-weight:700; font-size:30px; color:var(--gold);
+  }
+  .result-panel h2{ margin:0 0 6px; font-size:20px; }
+  .result-panel p{ color:var(--muted); max-width:44ch; margin:0 auto 20px; font-size:14px; line-height:1.6; }
+  .result-actions{ display:flex; gap:10px; justify-content:center; flex-wrap:wrap; }
+  .btn-secondary, .btn-primary{
+    border:none; border-radius:8px; padding:11px 20px; font-weight:600;
+    font-family:'Spectral',serif; cursor:pointer; font-size:14px;
+  }
+  .btn-primary{ background:var(--ink); color:#fff; }
+  .btn-secondary{ background:#fff; color:var(--ink); border:1px solid var(--line); }
+
+  footer.note{ text-align:center; margin-top:36px; font-size:12px; color:var(--muted); line-height:1.7; }
+</style>
+</head>
+<body>
+<div id="app">
+
+  <header class="topbar">
+    <div class="brand">
+      <span class="mark">🧭</span>
+      <span>
+        <strong>Ekspedisi Sains Lanjut</strong>
+        <span class="sub">IPA untuk SMA</span>
+      </span>
+    </div>
+    <a class="home-link" href="index.html">← Beranda</a>
+  </header>
+
+  <main id="view-hub" class="active">
+    <div class="hero">
+      <svg class="contour" viewBox="0 0 800 120" preserveAspectRatio="none" aria-hidden="true">
+        <path d="M0 90 C 150 40, 300 110, 450 60 S 700 20, 800 70" fill="none" stroke="#C9A227" stroke-width="1.5"/>
+        <path d="M0 60 C 150 100, 300 30, 450 90 S 700 110, 800 40" fill="none" stroke="#3F5C46" stroke-width="1.5"/>
+      </svg>
+      <div class="hero-inner">
+        <div class="eyebrow">Menjelang UTBK &amp; seleksi masuk perguruan tinggi</div>
+        <h1>Empat wilayah, satu ekspedisi ilmiah.</h1>
+        <p>Latih pemahaman IPA tingkat lanjut per mata pelajaran. Tidak ada urutan wajib — pilih wilayah mana pun sesuai kebutuhan belajarmu, dan pantau kesiapanmu di sini.</p>
+      </div>
+    </div>
+
+    <div class="readiness">
+      <div class="grade-circle" id="overall-grade">—</div>
+      <div class="rtext">
+        <div class="label">Indeks Kesiapan</div>
+        <div class="value" id="overall-text">Belum ada data — mulai satu wilayah untuk melihat hasilnya.</div>
+      </div>
+      <div class="breakdown" id="breakdown"></div>
+    </div>
+
+    <p class="grid-heading">Wilayah ekspedisi</p>
+    <div class="zone-grid" id="zone-grid"></div>
+
+    <footer class="note">Nilai dan indeks kesiapan dihitung dari sesi saat ini dan akan tersegarkan bila halaman dimuat ulang.</footer>
+  </main>
+
+  <main id="view-quiz">
+    <div class="quiz-panel">
+      <div class="quiz-head">
+        <div class="place"><span class="icon" id="q-icon">⚛️</span><span id="q-place">Nama Wilayah</span></div>
+        <button class="back-link" id="btn-back-hub">← Peta</button>
+      </div>
+      <div class="q-meta-row">
+        <span class="q-counter" id="q-counter">Soal 1 / 5</span>
+        <span class="q-tag" id="q-tag">Konsep</span>
+      </div>
+      <div class="q-text" id="q-text">Pertanyaan</div>
+      <div class="options" id="q-options"></div>
+      <div class="feedback" id="q-feedback">
+        <span class="tag" id="q-feedback-tag"></span>
+        <span id="q-feedback-text"></span>
+      </div>
+      <button class="btn-next" id="btn-next">Lanjut →</button>
+    </div>
+  </main>
+
+  <main id="view-result">
+    <div class="result-panel">
+      <div class="grade-big" id="r-grade">A</div>
+      <h2 id="r-title">Hasil Wilayah</h2>
+      <p id="r-text">Ringkasan hasil.</p>
+      <div class="result-actions">
+        <button class="btn-secondary" id="btn-retry">Coba Lagi</button>
+        <button class="btn-primary" id="btn-to-hub">Kembali ke Peta</button>
+      </div>
+    </div>
+  </main>
+
+</div>
+
+<script>
+(function(){
+
+  const ZONES = [
+    {
+      id:'fisika', name:'Fisika', icon:'⚛️', color:'#4A5A63',
+      blurb:'Mekanika, kelistrikan, dan konsep dasar fisika modern.',
+      questions:[
+        { q:'Dalam gerak lurus berubah beraturan (GLBB), grafik kecepatan terhadap waktu berbentuk…', opts:['Garis lurus mendatar','Garis lurus miring','Parabola terbuka ke atas','Kurva eksponensial'], a:1, tag:'Konsep', fact:'Karena percepatan konstan, kecepatan berubah secara linear terhadap waktu.' },
+        { q:'Sebuah benda bermassa 2 kg dipercepat dengan gaya 10 N. Percepatan benda tersebut adalah…', opts:['20 m/s²','0,2 m/s²','5 m/s²','12 m/s²'], a:2, tag:'Hitungan', fact:'Menggunakan Hukum II Newton: a = F / m = 10 / 2 = 5 m/s².' },
+        { q:'Hukum kekekalan energi mekanik berlaku sepenuhnya jika…', opts:['Ada gaya gesek besar','Tidak ada gaya gesek (sistem konservatif)','Benda dalam keadaan diam','Massa benda berubah'], a:1, tag:'Konsep', fact:'Gaya gesek adalah gaya non-konservatif yang mengubah sebagian energi mekanik menjadi kalor.' },
+        { q:'Pada gerak melingkar beraturan, arah percepatan sentripetal selalu…', opts:['Searah kecepatan','Menjauhi pusat lingkaran','Menuju pusat lingkaran','Tidak menentu'], a:2, tag:'Analisis', fact:'Percepatan sentripetal menjaga benda tetap bergerak pada lintasan melingkar dengan mengarah ke pusat.' },
+        { q:'Sebuah kapasitor 4 µF diberi tegangan 12 V. Muatan yang tersimpan adalah…', opts:['3 µC','16 µC','8 µC','48 µC'], a:3, tag:'Hitungan', fact:'Q = C × V = 4 µF × 12 V = 48 µC.' },
+      ]
+    },
+    {
+      id:'kimia', name:'Kimia', icon:'🧪', color:'#B0522D',
+      blurb:'Ikatan kimia, stoikiometri, larutan, dan reaksi redoks.',
+      questions:[
+        { q:'Ikatan yang terbentuk akibat serah terima elektron antar atom disebut ikatan…', opts:['Kovalen','Ion','Logam','Hidrogen'], a:1, tag:'Konsep', fact:'Ikatan ion umumnya terjadi antara atom logam yang melepas elektron dan nonlogam yang menerima elektron.' },
+        { q:'Diketahui Ar C = 12 dan Ar O = 16. Massa molekul relatif (Mr) CO₂ adalah…', opts:['28','32','44','16'], a:2, tag:'Hitungan', fact:'Mr CO2 = Ar C + (2 × Ar O) = 12 + 32 = 44.' },
+        { q:'Larutan penyangga (buffer) berfungsi untuk…', opts:['Menaikkan pH secara drastis','Menurunkan pH secara drastis','Mempertahankan pH larutan','Mengubah warna larutan'], a:2, tag:'Konsep', fact:'Larutan buffer menahan perubahan pH ketika ditambah sedikit asam atau basa.' },
+        { q:'Reaksi oksidasi pada suatu zat selalu diikuti oleh…', opts:['Reaksi netralisasi pada zat lain','Reaksi reduksi pada zat lain','Reaksi pengendapan','Reaksi penguapan'], a:1, tag:'Analisis', fact:'Reaksi redoks selalu berpasangan: elektron yang dilepas satu zat diterima zat lain.' },
+        { q:'Menurut hukum kekekalan massa Lavoisier, massa zat sebelum dan sesudah reaksi kimia adalah…', opts:['Selalu bertambah','Selalu berkurang','Selalu sama','Tergantung suhu reaksi'], a:2, tag:'Konsep', fact:'Massa total zat sebelum dan sesudah reaksi kimia dalam sistem tertutup tidak berubah.' },
+      ]
+    },
+    {
+      id:'biologi', name:'Biologi', icon:'🧬', color:'#3F5C46',
+      blurb:'Genetika, evolusi, bioteknologi, dan fisiologi manusia.',
+      questions:[
+        { q:'Proses pembelahan sel yang menghasilkan sel anak dengan jumlah kromosom setengah dari sel induk disebut…', opts:['Mitosis','Meiosis','Amitosis','Sitokinesis'], a:1, tag:'Konsep', fact:'Meiosis menghasilkan sel gamet (kelamin) dengan jumlah kromosom haploid.' },
+        { q:'Materi genetik yang membawa sifat keturunan terletak pada…', opts:['Ribosom','Mitokondria','DNA','Sitoplasma'], a:2, tag:'Konsep', fact:'DNA menyimpan informasi genetik yang diwariskan dari induk ke keturunannya.' },
+        { q:'Menurut teori evolusi Darwin, individu yang mampu bertahan hidup adalah yang…', opts:['Paling besar ukurannya','Paling banyak jumlahnya','Paling mampu beradaptasi dengan lingkungan','Paling lambat berkembang biak'], a:2, tag:'Analisis', fact:'Prinsip seleksi alam menyatakan individu yang paling sesuai dengan lingkungannya cenderung bertahan dan berkembang biak.' },
+        { q:'Bioteknologi modern banyak memanfaatkan teknik…', opts:['Pembakaran biomassa','Rekayasa genetika','Penyulingan minyak','Pengecatan sel'], a:1, tag:'Konsep', fact:'Rekayasa genetika memungkinkan penyisipan atau perubahan gen suatu organisme, misalnya pada produksi insulin oleh bakteri.' },
+        { q:'Hormon insulin dalam tubuh manusia berfungsi untuk…', opts:['Menaikkan kadar gula darah','Menurunkan kadar gula darah','Mempercepat detak jantung','Mengatur suhu tubuh'], a:1, tag:'Konsep', fact:'Insulin membantu sel menyerap glukosa dari darah, sehingga kadar gula darah menurun.' },
+      ]
+    },
+    {
+      id:'kebumian', name:'Bumi & Antariksa', icon:'🌐', color:'#C9A227',
+      blurb:'Tektonik, atmosfer, iklim, dan fenomena antariksa.',
+      questions:[
+        { q:'Teori yang menjelaskan pergerakan lempeng-lempeng benua di permukaan bumi disebut…', opts:['Teori evolusi','Tektonik lempeng','Teori atom','Hukum kekekalan energi'], a:1, tag:'Konsep', fact:'Tektonik lempeng menjelaskan pergerakan lempeng litosfer yang menyebabkan gempa dan pembentukan gunung.' },
+        { q:'Lapisan atmosfer tempat terjadinya sebagian besar fenomena cuaca adalah…', opts:['Stratosfer','Mesosfer','Troposfer','Termosfer'], a:2, tag:'Konsep', fact:'Troposfer adalah lapisan terendah atmosfer, tempat awan terbentuk dan cuaca terjadi.' },
+        { q:'Efek rumah kaca yang berlebihan dapat menyebabkan…', opts:['Pendinginan global','Gerhana matahari','Pemanasan global','Gempa bumi'], a:2, tag:'Analisis', fact:'Gas rumah kaca menahan panas matahari di atmosfer, meningkatkan suhu rata-rata bumi.' },
+        { q:'Bintang yang paling dekat dengan bumi adalah…', opts:['Proxima Centauri','Sirius','Matahari','Alpha Centauri'], a:2, tag:'Konsep', fact:'Matahari adalah bintang pusat tata surya kita dan yang terdekat dengan bumi.' },
+        { q:'Fenomena pasang surut air laut terutama dipengaruhi oleh gaya gravitasi dari…', opts:['Bintang jauh','Bulan dan matahari','Planet Mars','Angin laut'], a:1, tag:'Konsep', fact:'Gravitasi bulan memiliki pengaruh terbesar, dibantu oleh gravitasi matahari, terhadap pasang surut air laut.' },
+      ]
+    },
+  ];
+
+  // in-memory only — no persistent storage used
+  let results = {}; // zoneId -> { best: percent, lastCorrect, lastTotal }
+  let current = { zoneIndex:0, qIndex:0, correct:0, answered:false };
+
+  const views = {
+    hub: document.getElementById('view-hub'),
+    quiz: document.getElementById('view-quiz'),
+    result: document.getElementById('view-result'),
+  };
+  function showView(name){
+    Object.values(views).forEach(v=>v.classList.remove('active'));
+    views[name].classList.add('active');
+  }
+
+  function gradeFor(percent){
+    if(percent >= 100) return { letter:'A+', desc:'Sangat siap' };
+    if(percent >= 80) return { letter:'A', desc:'Siap' };
+    if(percent >= 60) return { letter:'B', desc:'Cukup, perlu latihan lagi' };
+    if(percent >= 40) return { letter:'C', desc:'Perlu banyak berlatih' };
+    return { letter:'D', desc:'Mulai dari dasar lagi' };
+  }
+
+  function renderReadiness(){
+    const attempted = Object.keys(results);
+    const overallGradeEl = document.getElementById('overall-grade');
+    const overallTextEl = document.getElementById('overall-text');
+    const breakdownEl = document.getElementById('breakdown');
+    breakdownEl.innerHTML = '';
+
+    if(attempted.length === 0){
+      overallGradeEl.textContent = '—';
+      overallGradeEl.style.borderColor = '#DCD2BE';
+      overallGradeEl.style.color = '#6B6055';
+      overallTextEl.textContent = 'Belum ada data — mulai satu wilayah untuk melihat hasilnya.';
+      return;
+    }
+
+    const avg = attempted.reduce((s,id)=> s + results[id].best, 0) / attempted.length;
+    const g = gradeFor(avg);
+    overallGradeEl.textContent = g.letter;
+    overallGradeEl.style.borderColor = 'var(--gold)';
+    overallGradeEl.style.color = 'var(--gold)';
+    overallTextEl.textContent = `${Math.round(avg)}% rata-rata · ${g.desc} · ${attempted.length} dari ${ZONES.length} wilayah dicoba`;
+
+    ZONES.forEach(z=>{
+      const r = results[z.id];
+      const span = document.createElement('span');
+      if(r){
+        span.innerHTML = `${z.icon} <b>${gradeFor(r.best).letter}</b>`;
+      } else {
+        span.innerHTML = `${z.icon} belum dicoba`;
+      }
+      breakdownEl.appendChild(span);
+    });
+  }
+
+  function renderZones(){
+    const grid = document.getElementById('zone-grid');
+    grid.innerHTML = '';
+    ZONES.forEach((z,i)=>{
+      const r = results[z.id];
+      const card = document.createElement('button');
+      card.className = 'zone';
+      card.style.setProperty('--zone-color', z.color);
+      card.innerHTML = `
+        <div class="top">
+          <span class="icon">${z.icon}</span>
+          <span class="grade-pill ${r ? '' : 'empty'}">${r ? gradeFor(r.best).letter : 'Belum dicoba'}</span>
+        </div>
+        <h3>${z.name}</h3>
+        <div class="meta">${z.blurb}</div>
+        <div class="meta" style="margin-top:6px;">5 soal · tingkat lanjut</div>
+      `;
+      card.addEventListener('click', ()=> startZone(i));
+      grid.appendChild(card);
+    });
+  }
+
+  function startZone(i){
+    current = { zoneIndex:i, qIndex:0, correct:0, answered:false };
+    showView('quiz');
+    renderQuestion();
+  }
+
+  function renderQuestion(){
+    const z = ZONES[current.zoneIndex];
+    const q = z.questions[current.qIndex];
+    document.getElementById('q-icon').textContent = z.icon;
+    document.getElementById('q-place').textContent = z.name;
+    document.getElementById('q-counter').textContent = `Soal ${current.qIndex+1} / ${z.questions.length}`;
+    document.getElementById('q-tag').textContent = q.tag;
+    document.getElementById('q-text').textContent = q.q;
+
+    const opts = document.getElementById('q-options');
+    opts.innerHTML = '';
+    q.opts.forEach((text, idx)=>{
+      const b = document.createElement('button');
+      b.className = 'opt';
+      b.style.setProperty('--zone-color', z.color);
+      b.textContent = text;
+      b.addEventListener('click', ()=> selectAnswer(idx));
+      opts.appendChild(b);
+    });
+
+    document.getElementById('q-feedback').classList.remove('show');
+    document.getElementById('btn-next').classList.remove('show');
+    current.answered = false;
+  }
+
+  function selectAnswer(idx){
+    if(current.answered) return;
+    current.answered = true;
+    const z = ZONES[current.zoneIndex];
+    const q = z.questions[current.qIndex];
+    const isCorrect = idx === q.a;
+    if(isCorrect) current.correct++;
+
+    document.querySelectorAll('#q-options .opt').forEach((b,i)=>{
+      b.disabled = true;
+      if(i === q.a) b.classList.add('correct');
+      else if(i === idx) b.classList.add('wrong');
+    });
+
+    const fb = document.getElementById('q-feedback');
+    const tagEl = document.getElementById('q-feedback-tag');
+    tagEl.className = 'tag ' + (isCorrect ? 'ok' : 'no');
+    tagEl.textContent = isCorrect ? 'Jawaban tepat' : 'Kurang tepat';
+    document.getElementById('q-feedback-text').textContent = q.fact;
+    fb.classList.add('show');
+
+    const nextBtn = document.getElementById('btn-next');
+    const isLast = current.qIndex === z.questions.length - 1;
+    nextBtn.textContent = isLast ? 'Lihat Hasil →' : 'Lanjut →';
+    nextBtn.classList.add('show');
+  }
+
+  document.getElementById('btn-next').addEventListener('click', ()=>{
+    const z = ZONES[current.zoneIndex];
+    if(current.qIndex < z.questions.length - 1){
+      current.qIndex++;
+      renderQuestion();
+    } else {
+      finishZone();
+    }
+  });
+
+  document.getElementById('btn-back-hub').addEventListener('click', ()=>{
+    renderZones(); renderReadiness();
+    showView('hub');
+  });
+
+  function finishZone(){
+    const z = ZONES[current.zoneIndex];
+    const total = z.questions.length;
+    const correct = current.correct;
+    const percent = Math.round((correct/total)*100);
+    const prevBest = results[z.id] ? results[z.id].best : 0;
+    results[z.id] = { best: Math.max(prevBest, percent), lastCorrect: correct, lastTotal: total };
+
+    const g = gradeFor(percent);
+    document.getElementById('r-grade').textContent = g.letter;
+    document.getElementById('r-title').textContent = `Hasil wilayah ${z.name}`;
+    document.getElementById('r-text').textContent =
+      `Kamu menjawab benar ${correct} dari ${total} soal (${percent}%). ${g.desc}. Nilai terbaikmu di wilayah ini: ${gradeFor(results[z.id].best).letter}.`;
+
+    showView('result');
+  }
+
+  document.getElementById('btn-retry').addEventListener('click', ()=>{
+    startZone(current.zoneIndex);
+  });
+  document.getElementById('btn-to-hub').addEventListener('click', ()=>{
+    renderZones(); renderReadiness();
+    showView('hub');
+  });
+
+  // init
+  renderReadiness();
+  renderZones();
+})();
+</script>
+</body>
+</html>
